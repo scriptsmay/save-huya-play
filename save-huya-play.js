@@ -1,9 +1,15 @@
+/**
+ * 任务名称
+ * name: 抓取虎牙直播回放
+ * 定时规则
+ * cron: 1 1 * * *
+ */
 const puppeteer = require('puppeteer');
 
 // 数据库初始化
-const pool = require('./pg')
+const pool = require('./config/pg')
 
-const huyaUsers = require('./config').huya
+const huyaUsers = require('./config/config').huya
 
 async function getVideoLinks(url) {
   // 1. 启动浏览器（可设置 headless: false 以查看浏览器操作）
