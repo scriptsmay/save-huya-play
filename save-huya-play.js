@@ -5,6 +5,7 @@
  * cron: 1 1 * * *
  */
 const puppeteer = require('puppeteer');
+const log = require('./config/log');
 
 // 数据库初始化
 const pool = require('./config/pg')
@@ -39,8 +40,8 @@ async function getVideoLinks(url) {
     });
 
     // 4. 打印结果
-    console.log(`在 ${url} 中找到的视频链接：`);
-    console.log(videoLinks);
+    // log(`在 ${url} 中找到的视频链接：`);
+    // log(videoLinks);
 
     return videoLinks;
 
@@ -66,12 +67,11 @@ async function scrapeAndSave(url, username) {
   const values = videos.flatMap(v => [v.url, v.title, v.duration, v.cover, v.date, username]);
 
   await pool.query(query, values)
-    .then(res => console.log(`成功插入 ${res.rowCount} 条，跳过 ${videos.length - res.rowCount} 条重复数据`))
-    .catch(err => console.error('错误:', err));
-  console.log(`抓取到 ${username} 的 ${videos.length} 条数据`);
+    .then(res => log(`成功插入 ${res.rowCount} 条，跳过 ${videos.length - res.rowCount} 条重复数据`))
+    .catch(err => console.error(new Date().toLocaleString(), '错误:', err));
+  log(`抓取到 ${username} 的 ${videos.length} 条数据`);
 }
 
 huyaUsers.forEach(async config => {
   await scrapeAndSave(config.url, config.name).catch(console.error);
 });
-
