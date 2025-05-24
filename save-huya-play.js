@@ -10,7 +10,9 @@ const log = require('./config/log');
 // 数据库初始化
 const pool = require('./config/pg')
 
-const huyaUsers = require('./config/config').huya
+const config = require('./config/config')
+const targetUsers = config.huya
+const maxPage = config.huyaPage
 
 async function getVideoLinks(url) {
   // 1. 启动浏览器（可设置 headless: false 以查看浏览器操作）
@@ -39,10 +41,6 @@ async function getVideoLinks(url) {
       });
     });
 
-    // 4. 打印结果
-    // log(`在 ${url} 中找到的视频链接：`);
-    // log(videoLinks);
-
     return videoLinks;
 
   } catch (error) {
@@ -56,6 +54,10 @@ async function getVideoLinks(url) {
 
 async function scrapeAndSave(url, username) {
   const videos = await getVideoLinks(url);
+  log(`抓取到 ${username} 的 ${videos.length} 条数据`);
+  if (!videos.length) {
+    return false;
+  }
 
   // 批量插入数据库
   const query = `
@@ -65,13 +67,16 @@ async function scrapeAndSave(url, username) {
   `;
 
   const values = videos.flatMap(v => [v.url, v.title, v.duration, v.cover, v.date, username]);
-
   await pool.query(query, values)
     .then(res => log(`成功插入 ${res.rowCount} 条，跳过 ${videos.length - res.rowCount} 条重复数据`))
     .catch(err => console.error(new Date().toLocaleString(), '错误:', err));
-  log(`抓取到 ${username} 的 ${videos.length} 条数据`);
+  
 }
 
-huyaUsers.forEach(async config => {
-  await scrapeAndSave(config.url, config.name).catch(console.error);
+targetUsers.forEach(async config => {
+  for (let index = 0; index < maxPage; index++) {
+    const targetUrl = `${config.url}&pageIndex=${index + 1}`;
+    await scrapeAndSave(targetUrl, config.name).catch(console.error);
+  }
+  
 });
