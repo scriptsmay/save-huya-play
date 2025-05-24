@@ -1,0 +1,23 @@
+{
+  "name": "save-huyaplay",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node save-huya-play.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scriptsmay/save-huya-play.git"
+  },
+  "author": "scriptsmay",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/scriptsmay/save-huya-play/issues"
+  },
+  "homepage": "https://github.com/scriptsmay/save-huya-play#readme",
+  "description": "",
+  "dependencies": {
+    "pg": "^8.16.0",
+    "puppeteer": "^24.9.0"
+  }
+}
