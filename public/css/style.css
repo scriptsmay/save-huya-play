@@ -1,0 +1,33 @@
+body {
+  background-color: #f8f9fa;
+}
+
+a {
+  text-decoration: none;
+}
+
+.card {
+  transition: transform 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  height: 140px;
+  object-fit: cover;
+}
+.card-text-duration {
+  position: absolute;
+  right: 10px;
+  top: 110px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+}
+
+/* .pagination {
+  margin-top: 30px;
+} */

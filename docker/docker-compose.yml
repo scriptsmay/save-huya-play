@@ -1,0 +1,24 @@
+services:
+  directus:
+    image: directus/directus:latest
+    container_name: directus
+    ports:
+      - "18055:8055"  # 映射端口：8055（默认）
+    volumes:
+      # 默认情况下，上传存储在 `/Directus/uploads` 中始终确保您的卷在使用本地驱动程序时与存储根相匹配
+      - ./uploads:/directus/uploads
+    environment:
+      # 数据库配置（PostgreSQL）
+      DB_CLIENT: "pg"
+      DB_HOST: "192.168.31.18"
+      DB_PORT: "15432"
+      DB_DATABASE: "directus"
+      DB_USER: "user_2hPFjc"
+      DB_PASSWORD: "password_QWr6wQ"
+      
+      # Directus 基础配置
+      KEY: 255d861b-5ea1-5996-9aa3-922530ec40b1
+      SECRET: 6116487b-cda1-52c2-b5b5-c8022c45e263
+      ADMIN_EMAIL: virola@foxmail.com
+      ADMIN_PASSWORD: zzz369330
+    restart: unless-stopped
