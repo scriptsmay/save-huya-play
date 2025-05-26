@@ -5,11 +5,10 @@
 cd "$(dirname "$0")"
 
 # 显式设置 PATH 环境变量，确保 node 和 npm 可用
-# 这句加上之后反而报错了
-# export PATH=/usr/local/bin:$PATH
+source /Users/virola/.nvm/nvm.sh
 
 # 执行 npm test 命令
-npm test >> logs/huya-records.log 2>&1
+npm test >> "logs/huya-records.$(date +'%Y%m%d').log" 2>&1
 
 if [ $? -eq 0 ]; then
   echo "测试通过"
