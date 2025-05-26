@@ -26,7 +26,7 @@ app.use(express.static('public'));
 app.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
     const searchTerm = req.query.search || '';
 
@@ -37,13 +37,16 @@ app.get('/', async (req, res) => {
     
     // 添加搜索条件
     if (searchTerm) {
-      countQuery += ' WHERE title ILIKE $1 OR username ILIKE $1';
-      dataQuery += ' WHERE title ILIKE $1 OR username ILIKE $1';
+      const searchQuery = ' WHERE title ILIKE $1 OR username ILIKE $1 OR date ILIKE $1'
+      countQuery += searchQuery;
+      dataQuery += searchQuery;
       queryParams.push(`%${searchTerm}%`);
     }
 
-    // 添加排序和分页
-    dataQuery += ' ORDER BY id LIMIT $' + (queryParams.length + 1) + 
+    // 默认排序
+    dataQuery += ' ORDER BY created_at DESC';
+    // 添加分页
+    dataQuery += ' LIMIT $' + (queryParams.length + 1) + 
                  ' OFFSET $' + (queryParams.length + 2);
     queryParams.push(limit, offset);
 

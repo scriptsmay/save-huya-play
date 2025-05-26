@@ -1,5 +1,13 @@
+html {
+  font-size: 14px;
+}
 body {
   background-color: #f8f9fa;
+  font-size: 14px;
+  font-family: 'HarmonyOS Sans SC', 'Source Han Sans SC', 'Noto Sans CJK SC',
+    'HanHei SC', '方正兰亭黑_GB18030', '方正兰亭黑_GBK', system-ui,
+    ui-sans-serif, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji', emoji;
 }
 
 a {
