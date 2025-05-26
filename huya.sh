@@ -9,7 +9,7 @@ cd "$(dirname "$0")"
 # export PATH=/usr/local/bin:$PATH
 
 # 执行 npm test 命令
-npm test
+npm test >> logs/huya-records.log 2>&1
 
 if [ $? -eq 0 ]; then
   echo "测试通过"
