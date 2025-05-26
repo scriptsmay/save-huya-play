@@ -5,12 +5,12 @@
  * cron: 1 1 * * *
  */
 const puppeteer = require('puppeteer');
-const log = require('./config/log');
+const log = require('../config/log');
 
 // 数据库初始化
-const pool = require('./config/pg')
+const pool = require('../config/pg')
 
-const config = require('./config/config')
+const config = require('../config/config')
 const targetUsers = config.huya
 const maxPage = config.huyaPage
 
