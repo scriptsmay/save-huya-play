@@ -54,7 +54,7 @@ async function getVideoLinks(url) {
 
 async function scrapeAndSave(url, username) {
   const videos = await getVideoLinks(url);
-  log(`抓取到 ${username} 的 ${videos.length} 条数据`);
+  log(`[${username}]抓取到 ${videos.length} 条数据`);
   if (!videos.length) {
     return false;
   }
@@ -68,8 +68,8 @@ async function scrapeAndSave(url, username) {
 
   const values = videos.flatMap(v => [v.url, v.title, v.duration, v.cover, v.date, username]);
   await pool.query(query, values)
-    .then(res => log(`成功插入 ${res.rowCount} 条，跳过 ${videos.length - res.rowCount} 条重复数据`))
-    .catch(err => console.error(new Date().toLocaleString(), '错误:', err));
+    .then(res => log(`[${username}]成功插入 ${res.rowCount} 条，跳过 ${videos.length - res.rowCount} 条重复数据`))
+    .catch(err => console.error(new Date().toLocaleString(), `[${username}]错误:`, err));
   
 }
 
