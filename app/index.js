@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -21,6 +22,13 @@ app.set('view engine', 'ejs');
 
 // 静态文件
 app.use(express.static('public'));
+
+// 中间件
+app.use((req, res, next) => {
+  res.locals.path = req.path;
+  // res.locals.searchTerm = req.query.search || '';
+  next();
+});
 
 // 路由：获取分页数据
 app.get('/', async (req, res) => {
@@ -68,6 +76,38 @@ app.get('/', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
+  }
+});
+
+// 路由：查看 logs 目录下的 .log 文件
+app.get('/logs', async (req, res) => {
+  const logsDir = path.join(__dirname, '../logs'); // 日志目录
+
+  try {
+    // 获取目录中的文件列表
+    const files = fs.readdirSync(logsDir);
+    const logFiles = files.filter(file => file.endsWith('.log'));
+
+    // 获取查询参数 ?file=xxx.log
+    const requestedFile = req.query.file;
+    let selectedFileContent = '';
+    let selectedFileName = '';
+
+    if (requestedFile && logFiles.includes(requestedFile)) {
+      const filePath = path.join(logsDir, requestedFile);
+      selectedFileContent = fs.readFileSync(filePath, 'utf-8');
+      selectedFileName = requestedFile;
+    }
+
+    // 返回 HTML 页面展示日志文件列表和内容
+    res.render('logs', {
+      logFiles,
+      selectedFileName,
+      selectedFileContent,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('无法读取日志文件');
   }
 });
 

@@ -1,6 +1,7 @@
 html {
   font-size: 14px;
 }
+
 body {
   background-color: #f8f9fa;
   font-size: 14px;
@@ -28,6 +29,7 @@ a {
   height: 140px;
   object-fit: cover;
 }
+
 .card-text-duration {
   position: absolute;
   right: 10px;
@@ -36,6 +38,18 @@ a {
   color: #fff;
 }
 
-/* .pagination {
-  margin-top: 30px;
-} */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  margin: 5px 0;
+}
+
+pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
