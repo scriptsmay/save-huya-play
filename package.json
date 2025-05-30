@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node app/index.js",
-    "test": "node scripts/save-huya-play.js"
+    "test": "node scripts/save-huya-play.js",
+    "checkin": "node scripts/auto-huya.js"
   },
   "repository": {
     "type": "git",
