@@ -57,17 +57,8 @@ const SELECTORS = {
       fs.writeFileSync('cookies.json', JSON.stringify(cookies));
       console.log('已保存 cookies 到 cookies.json 文件');
     } else {
-      autoTaskCheck(page);
-
-      if (!process.env.ROOM_LIST) {
-        console.error('请设置房间ID: ROOM_LIST');
-        return;
-      }
-      const roomPage = await browser.newPage();
-      const ROOM_LIST = process.env.ROOM_LIST.split(',');
-      for (const roomId of ROOM_LIST) {
-        await autoCheckInRoom(roomPage, roomId);
-      }
+      await autoTaskCheck(page);
+      await startTasks(browser)
     }
 
   } catch (error) {
@@ -77,15 +68,45 @@ const SELECTORS = {
   }
 })();
 
+/**
+ * 异步检查登录状态
+ * 
+ * 该函数通过检查页面上是否有特定的用户名称元素来判断用户是否已登录
+ * 如果用户已登录，会打印用户名并返回用户名，否则打印用户未登录并返回false
+ * 
+ * @param {Object} page - 一个表示当前页面的对象，用于执行页面操作
+ * @returns {Promise<string | boolean>} - 返回用户名（如果已登录）或false（如果未登录）
+ */
 async function checkLoginStatus(page) {
+  // 尝试获取页面上的用户名称元素
   const userElement = await page.$(SELECTORS.USER_NAME_ELEMENT);
+
+  // 如果用户名称元素存在，表示用户已登录
   if (userElement) {
+    // 获取并打印用户名称
     const username = await page.$eval(SELECTORS.USER_NAME_ELEMENT, el => el.textContent.trim());
     console.log('用户已登录，用户名:', username);
+    // 返回用户名
     return username;
   } else {
+    // 如果用户名称元素不存在，表示用户未登录
     console.log('用户未登录');
+    // 返回false表示未登录
     return false;
+  }
+}
+
+async function startTasks(browser) {
+
+  if (!process.env.ROOM_LIST) {
+    console.error('请设置房间ID: ROOM_LIST');
+    return;
+  }
+  const roomPage = await browser.newPage();
+  const ROOM_LIST = process.env.ROOM_LIST.split(',');
+  for (const roomId of ROOM_LIST) {
+    await autoCheckInRoom(roomPage, roomId);
+    // TODO：自动赠送虎粮
   }
 }
 
@@ -108,10 +129,12 @@ async function autoCheckInRoom(page, roomId) {
     // 1. 导航到房间页
     console.log(`开始处理房间 ${roomId}`);
     await page.goto(URL_ROOM, {
-      waitUntil: 'networkidle2',
-      timeout: 15000
+      waitUntil: 'domcontentloaded',
+      timeout: 10000
     }).catch(error => {
-      console.warn(`房间 ${roomId} 加载超时:`);
+      console.warn(`房间 ${roomId} 网络加载超时，但一般没影响`);
+      // autoCheckInRoom(page, roomId)
+      return false;
     });
 
     // 2. 等待并滚动到徽章元素
@@ -130,7 +153,7 @@ async function autoCheckInRoom(page, roomId) {
     // 3. hover徽章
 
     await page.hover(badgeSelector);
-    console.log(`房间 ${roomId}：点击徽章`);
+    console.log(`房间 ${roomId}：hover 粉丝牌`);
 
     // 4. 等待按钮出现并查找
     await page.waitForSelector(`${badgeSelector} a`, { timeout: 10000 });
