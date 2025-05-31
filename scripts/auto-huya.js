@@ -19,12 +19,14 @@ const SELECTORS = {
   // 礼物包裹图标
   ICON_BAG: '#player-package-btn',
   PRESENT_BTN: '.m-gift-item',
-  PRESENT_TEXT: '虎粮',
-  PRESENT_NUM: '.c-count',
   PRESENT_POPUP: '.g-present-content',
   PRESENT_INPUT: 'input[type="number"]',
   PRESENT_SUBMIT: '.c-send'
 };
+
+const GIFT_URL_STR = 'webPackageV2'
+const GIFT_FREE_TEXT = '虎粮';
+const GIFT_SUPER_TEXT = '超粉虎粮';
 
 // 公共变量：虎粮总数
 let globalPresentNum = 0;
@@ -46,7 +48,7 @@ let presentInit = false;
 
   try {
     // 打开目标页面
-    await page.goto(URL_USER, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.goto(URL_USER, { waitUntil: 'domcontentloaded', timeout: 10000 });
 
     const username = await checkLoginStatus(page);
     if (!username) {
@@ -76,9 +78,8 @@ let presentInit = false;
         console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
         return;
       }
-      const roomPage = await browser.newPage();
       for (const roomId of TARGET_ROOM_LIST) {
-        await autoCheckInRoom(roomPage, roomId);
+        await autoCheckInRoom(browser, roomId);
       }
     }
 
@@ -126,8 +127,10 @@ async function goTaskCenter(page) {
   }
   const URL_TASK = 'https://hd.huya.com/h5/task_center/index.html';
   try {
-    await page.goto(URL_TASK, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForNetworkIdle();
+    await page.goto(URL_TASK, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForNetworkIdle({ timeout: 10000 }).catch((err) => {
+      console.log('任务中心无事发生');
+    });
     console.log('任务中心签到完成');
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
@@ -139,12 +142,13 @@ async function goTaskCenter(page) {
  * @param {*} page 
  * @param {*} roomId 
  */
-async function autoCheckInRoom(page, roomId) {
+async function autoCheckInRoom(browser, roomId) {
   const URL_ROOM = `https://www.huya.com/${roomId}`;
 
   try {
     // 1. 导航到房间页
     console.log(`开始处理房间 ${roomId}`);
+    const page = await browser.newPage();
     await page.goto(URL_ROOM, {
       waitUntil: 'domcontentloaded',
       timeout: 10000
@@ -154,7 +158,7 @@ async function autoCheckInRoom(page, roomId) {
     });
 
     await roomCheckIn(page, roomId);
-    await roomPresents(page, roomId);
+    await roomPresents(page, browser, roomId);
 
   } catch (error) {
     console.error(`房间 ${roomId} 自动打卡过程中发生错误:`, error);
@@ -175,7 +179,10 @@ async function roomCheckIn(page, roomId) {
   console.log(`房间 ${roomId}：hover 粉丝牌`);
 
   // 4. 等待按钮出现并查找
-  await page.waitForSelector(`${badgeSelector} a`, { timeout: 10000 });
+  await page.waitForSelector(`${badgeSelector} a`, { timeout: 10000 }).catch(err => {
+    console.log(`房间 ${roomId}：未找到按钮，请检查页面结构`);
+    return page.hover(badgeSelector);
+  });
 
   // 获取所有按钮
   const buttons = await page.$$(`${badgeSelector} a`);
@@ -199,81 +206,175 @@ async function roomCheckIn(page, roomId) {
  * 直播间赠送虎粮
  * @param {*} page 
  */
-async function roomPresents(page, roomId) {
+async function roomPresents(page, browser, roomId) {
   if (presentInit && !globalPresentNum) {
     console.log(`已经没有免费虎粮了，不再进行赠送`)
     return false;
   }
   console.log(`房间 ${roomId}：开始进行赠送普通虎粮`)
-  const iconBag = SELECTORS.ICON_BAG;
-  await page.waitForSelector(iconBag, { timeout: 10000 });
-  console.log(`房间 ${roomId}：点击包裹图标`)
-  await page.click(iconBag);
 
-  // 点击之后会打开一个iframe，需要切换到iframe中
-  // 找到那个 src 包含 payNew 的 iframe
-  const iframePage = await getTheIframe(page)
+  let iframePage = await getTheIframe(page, roomId);
 
-  // 额外等待 iframe 内部内容加载
-  await iframePage.waitForFunction(() => document.readyState === 'complete');
-  // const packageList = await iframePage.waitForSelector('.g-package-list', { timeout: 10000 });
-
-  // TODO: 未完成，这里一直找不到这个元素
-  await iframePage.waitForSelector('.g-package-list', { timeout: 10000 }).catch((err) => {
-    console.warn(`房间 ${roomId}：未找到任何礼物`, err);
-  });
-
-  // 如果图标的文字是"虎粮"，则进行点击
-  const btns = await iframePage.$$(SELECTORS.PRESENT_BTN);
-  for (const btn of btns) {
-    const text = await btn.$('p').evaluate(el => el.textContent.trim());
-
-    if (text === SELECTORS.PRESENT_TEXT) {
-      console.log(`房间 ${roomId}：开始点击赠送虎粮`);
-      // await btn.click();
-      // 获取数量
-      let totalNum = await btn.$(SELECTORS.PRESENT_NUM).evaluate(el => el.textContent.trim());
-      globalPresentNum = +totalNum || 0;
-
-      await btn.hover();
-      // 确保弹出层弹出
-      await iframePage.waitForSelector(SELECTORS.PRESENT_POPUP, { timeout: 3000 }).catch((err) => {
-        console.warn(`房间 ${roomId}：ERROR  未找到礼物弹出层`);
-      });
-      // 选择input框输入赠送数量
-      await iframePage.click(SELECTORS.PRESENT_INPUT);
-      const num = Math.min(globalPresentNum, DEFAULT_PRESENT_NUM);
-      await iframePage.type(SELECTORS.PRESENT_INPUT, num.toString());
-
-      // 点击赠送按钮
-      await iframePage.click(SELECTORS.PRESENT_SUBMIT);
-      console.log(`房间 ${roomId}：赠送虎粮成功`);
-      globalPresentNum -= num;
-    }
+  if (!iframePage) {
+    return false;
   }
-  presentInit = true;
+  // await debugIframe(iframePage);
+  // console.log(`房间 ${roomId}：iframe url--> ${iframePage.url()}`);
+  const frame = iframePage; // 更名以避免误解
 
+  await frame.waitForSelector('.g-package-list', { timeout: 3000 }).catch((err) => {
+    console.warn(`房间 ${roomId}：未找到礼物box`, err);
+  });
+  try {
+    // 先等待目标元素出现
+    // await frame.waitForSelector(SELECTORS.PRESENT_BTN, { timeout: 5000 }).catch((err) => {
+    //   console.warn(`房间 ${roomId}：无事发生`);
+    // });
+    // 一次性获取所有按钮及其文本内容
+    const gifts = await frame.$$eval(SELECTORS.PRESENT_BTN, (buttons) =>
+      buttons.map((button, index) => {
+        return {
+          index,
+          text: button.querySelector('p')?.textContent.trim() || '无文本',
+          count: button.querySelector('.c-count')?.textContent.trim() || '0',
+        };
+      })
+    ).catch(err => {
+      console.error(`房间 ${roomId}：获取礼物列表失败`, err);
+      return [];
+    });
+    console.log('gifts:', gifts)
+    // 4. 验证结果
+    if (!gifts || gifts.length === 0) {
+      console.warn(`房间 ${roomId}：礼物列表为空（选择器：${SELECTORS.PRESENT_BTN}）`);
+      return [];
+    }
+
+    console.log(`房间 ${roomId}：礼物类别数：${gifts && gifts.length}`);
+
+    // 优化改成，查找页面第一个SELECTORS.PRESENT_BTN的元素，如果文字匹配 GIFT_SUPER_TEXT 则全部赠送
+    // 如果文字匹配 GIFT_FREE_TEXT 则赠送指定数量
+    for (const gift of gifts) {
+      const btn = await frame.$(SELECTORS.PRESENT_BTN);
+      const text = await frame.evaluate(btn => btn.querySelector('p')?.textContent.trim() || '', btn);
+      const realCount = await frame.evaluate(btn => btn.querySelector('.c-count')?.textContent.trim() || '0', btn);
+      console.log('realGiftCount:', realCount);
+      let giftCount = realCount;
+      if (text === GIFT_SUPER_TEXT) {
+        console.log(`房间 ${roomId}：赠送全部 ${GIFT_SUPER_TEXT}`);
+      } else if (text === GIFT_FREE_TEXT) {
+        giftCount = Math.min(gift.count, DEFAULT_PRESENT_NUM);
+        console.log(`房间 ${roomId}：赠送免费礼物 ${GIFT_FREE_TEXT}`);
+      }
+      await btn.hover();
+      await submitGift(roomId, frame, giftCount);
+    }
+
+    presentInit = true;
+  } catch (error) {
+    console.error(`房间 ${roomId}：获取礼物信息失败：`, error);
+  }
+}
+
+async function debugIframe(iframePage) {
+  // 1. 确认 iframe 已加载
+  console.log('iframe URL:', await iframePage.url());
+
+  // 2. 检查选择器是否存在
+  const selectorExists = await iframePage.evaluate((selector) => {
+    const el = document.querySelector(selector);
+    console.log('调试元素:', el); // 浏览器控制台可见
+    return el !== null;
+  }, SELECTORS.PRESENT_BTN);
+
+  console.log('选择器匹配:', selectorExists);
+
+  // 3. 打印 HTML 结构
+  console.log('iframe HTML:', await iframePage.content());
+
+  // 4. 尝试简化查询
+  const testResults = await iframePage.$$eval('*', els =>
+    els.map(el => el.tagName)
+  );
+  console.log('测试查询:', testResults);
+}
+
+/**
+ * 执行赠送虎粮
+ * @param {*} roomId 
+ * @param {*} page 
+ * @param {number | string} count 是否全部赠送
+ */
+async function submitGift(roomId, page, count) {
+  console.log(`房间 ${roomId}：开始赠送礼物`);
+
+  // 确保弹出层弹出
+  await page.waitForSelector(SELECTORS.PRESENT_POPUP, { timeout: 30000 }).catch((err) => {
+    console.warn(`房间 ${roomId}：ERROR  未找到礼物弹出层`);
+  });
+  // 选择input框输入赠送数量
+  await page.click(SELECTORS.PRESENT_INPUT);
+  await page.type(SELECTORS.PRESENT_INPUT, count.toString());
+
+  await page.waitForSelector(SELECTORS.PRESENT_SUBMIT, { timeout: 10000 }).catch((err) => {
+    console.warn(`房间 ${roomId}：等待赠送按钮 超时`);
+  });
+  // 点击赠送按钮
+  console.log(`房间 ${roomId}：点击赠送按钮`);
+  await page.click(SELECTORS.PRESENT_SUBMIT);
+  // await page.waitForNetworkIdle({ timeout: 10000 }).catch((err) => {
+  //   console.warn(`房间 ${roomId}：无事发生`);
+  // });
+  // 等待n秒模拟空闲
+  await new Promise(resolve => setTimeout(resolve, 10000));
+  // 点击立即送出
+  console.log(`房间 ${roomId}：赠送成功 ${count} 个`);
 }
 /**
- * 找到页面中最后一个 iframe
+ * 找到弹出的 iframe
  * @param {*} page 
  * @returns 
  */
-async function getTheIframe(page) {
-  const lastIframeHandle = await page.evaluateHandle(() => {
-    const iframes = document.querySelectorAll('iframe');
-    return iframes[iframes.length - 1];
+async function getTheIframe(page, roomId) {
+  const iconBag = SELECTORS.ICON_BAG;
+  await page.waitForSelector(iconBag, { timeout: 10000 }).catch((err) => {
+    console.warn(`房间 ${roomId}：未找到包裹图标`);
   });
+  console.log(`房间 ${roomId}：点击包裹图标`);
+  page.click(SELECTORS.ICON_BAG);
 
-  if (!lastIframeHandle.asElement()) {
-    console.warn('页面中没有 iframe');
-    return null;
-  }
-
-  // 单独获取 src
-  const src = await page.evaluate(iframe => iframe?.src, lastIframeHandle);
-  console.log('最后一个 iframe 的 src:', src); // 在 Node.js 端打印
-
-  const lastIframePage = await lastIframeHandle.contentFrame();
-  return lastIframePage;
+  await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
+    console.warn(`房间 ${roomId}：无事发生`);
+  });
+  return findFrame(page.mainFrame(), GIFT_URL_STR)
 }
+
+/**
+ * 查找指定url的frame
+ * @param {*} frame 
+ * @param {*} urlstr 
+ */
+function findFrame(frame, urlstr) {
+  if (frame.url().includes(urlstr)) {
+    // console.log(`[找到frame] ${frame.url()}`);
+    return frame;
+  }
+  for (let child of frame.childFrames()) {
+    const result = findFrame(child, urlstr);
+    if (result) {
+      return result;
+    }
+  }
+  return null;
+}
+
+// function dumpFrameTree(frame, indent) {
+//   console.log(indent + frame.url());
+//   console.log(`Frame attrs:`, {
+//     url: frame.url(),
+//     name: frame.name(),
+//     isDetached: frame.isDetached()
+//   });
+//   for (let child of frame.childFrames())
+//     dumpFrameTree(child, indent + '  ');
+// }
