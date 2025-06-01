@@ -79,13 +79,14 @@ const GIFT_SUPER_TEXT = '超粉虎粮';
       timeLog('已保存 cookies 到 cookies.json 文件');
     } else {
       await goTaskCenter(page);
+
       if (!TARGET_ROOM_LIST.length) {
         console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
         return;
       }
-      const page = await browser.newPage();
+      const newPage = await browser.newPage();
       for (const roomId of TARGET_ROOM_LIST) {
-        await autoCheckInRoom(page, roomId);
+        await autoCheckInRoom(newPage, roomId);
       }
     }
   } catch (error) {
