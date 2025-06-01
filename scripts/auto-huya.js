@@ -1,7 +1,7 @@
 // 本地环境变量
 require('dotenv').config();
 
-const puppeter = require('puppeteer');
+const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 // 定义目标 URL
@@ -30,7 +30,7 @@ const GIFT_SUPER_TEXT = '超粉虎粮';
 
 (async () => {
   // 启动浏览器
-  const browser = await puppeter.launch({
+  const browser = await puppeteer.launch({
     userDataDir: './user_data', // 指定用户数据目录
     headless: false, // 可视化模式更容易调试
   });
@@ -83,8 +83,9 @@ const GIFT_SUPER_TEXT = '超粉虎粮';
         console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
         return;
       }
+      const page = await browser.newPage();
       for (const roomId of TARGET_ROOM_LIST) {
-        await autoCheckInRoom(browser, roomId);
+        await autoCheckInRoom(page, roomId);
       }
     }
   } catch (error) {
@@ -151,14 +152,14 @@ async function goTaskCenter(page) {
  * @param {*} page
  * @param {*} roomId
  */
-async function autoCheckInRoom(browser, roomId) {
+async function autoCheckInRoom(page, roomId) {
   if (!roomId) return;
   const URL_ROOM = `https://www.huya.com/${roomId}`;
 
   try {
     // 1. 导航到房间页
     timeLog(`开始处理房间 ${roomId}`);
-    const page = await browser.newPage();
+
     await page
       .goto(URL_ROOM, {
         waitUntil: 'domcontentloaded',
@@ -291,7 +292,7 @@ async function sendAllGifts(roomId, frame) {
   }
 
   // 2. 再送免费礼物
-  while (availableGifts.free.length > 0) {
+  if (availableGifts.free.length > 0) {
     const giftIcon = availableGifts.free[0];
     const realCount = await giftIcon.evaluate(
       (btn) => btn.querySelector('.c-count')?.textContent.trim() || '0'
@@ -338,9 +339,6 @@ async function debugIframe(iframePage) {
  */
 async function submitGift(roomId, page, count) {
   timeLog(`房间 ${roomId}：开始赠送礼物`);
-
-  // test
-  count = 1;
 
   // 确保弹出层弹出
   await page
