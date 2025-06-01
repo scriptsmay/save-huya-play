@@ -222,7 +222,7 @@ async function roomCheckIn(page, roomId) {
  * @param {*} page
  */
 async function roomPresents(page, roomId) {
-  timeLog(`房间 ${roomId}：开始进行赠送普通虎粮`);
+  timeLog(`房间 ${roomId}：开始进行免费礼物赠送`);
 
   try {
     let iframePage = await getTheIframe(page, roomId);
