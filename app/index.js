@@ -7,6 +7,10 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// 日志目录
+const logsDir = path.join(__dirname, '../logs');
+const { LOG_ERR_HTML } = require('./template');
+
 // PostgreSQL 连接配置
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -42,10 +46,11 @@ app.get('/', async (req, res) => {
     let countQuery = 'SELECT COUNT(*) FROM videos';
     let dataQuery = 'SELECT * FROM videos';
     const queryParams = [];
-    
+
     // 添加搜索条件
     if (searchTerm) {
-      const searchQuery = ' WHERE title ILIKE $1 OR username ILIKE $1 OR date ILIKE $1'
+      const searchQuery =
+        ' WHERE title ILIKE $1 OR username ILIKE $1 OR date ILIKE $1';
       countQuery += searchQuery;
       dataQuery += searchQuery;
       queryParams.push(`%${searchTerm}%`);
@@ -54,12 +59,18 @@ app.get('/', async (req, res) => {
     // 默认排序
     dataQuery += ' ORDER BY created_at DESC';
     // 添加分页
-    dataQuery += ' LIMIT $' + (queryParams.length + 1) + 
-                 ' OFFSET $' + (queryParams.length + 2);
+    dataQuery +=
+      ' LIMIT $' +
+      (queryParams.length + 1) +
+      ' OFFSET $' +
+      (queryParams.length + 2);
     queryParams.push(limit, offset);
 
     // 获取数据总数
-    const countResult = await pool.query(countQuery, queryParams.slice(0, searchTerm ? 1 : 0));
+    const countResult = await pool.query(
+      countQuery,
+      queryParams.slice(0, searchTerm ? 1 : 0)
+    );
     const total = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(total / limit);
 
@@ -71,7 +82,7 @@ app.get('/', async (req, res) => {
       currentPage: page,
       totalPages,
       limit,
-      searchTerm  // 传递搜索词到前端
+      searchTerm, // 传递搜索词到前端
     });
   } catch (err) {
     console.error(err);
@@ -81,12 +92,10 @@ app.get('/', async (req, res) => {
 
 // 路由：查看 logs 目录下的 .log 文件
 app.get('/logs', async (req, res) => {
-  const logsDir = path.join(__dirname, '../logs'); // 日志目录
-
   try {
     // 获取目录中的文件列表
     const files = fs.readdirSync(logsDir);
-    const logFiles = files.filter(file => file.endsWith('.log'));
+    const logFiles = files.filter((file) => file.endsWith('.log'));
 
     // 获取查询参数 ?file=xxx.log
     const requestedFile = req.query.file;
@@ -107,7 +116,38 @@ app.get('/logs', async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send('无法读取日志文件');
+    res.status(500).send(LOG_ERR_HTML);
+  }
+});
+
+// 路由：删除指定名称的日志文件
+app.get('/logs/delete', async (req, res) => {
+  try {
+    // 获取目录中的文件列表
+    const files = fs.readdirSync(logsDir);
+    const logFiles = files.filter((file) => file.endsWith('.log'));
+
+    // 获取查询参数 ?file=xxx.log
+    const requestedFile = req.query.file;
+
+    if (!requestedFile || !logFiles.includes(requestedFile)) {
+      return res.status(400).send(LOG_ERR_HTML);
+    }
+
+    const filePath = path.join(logsDir, requestedFile);
+
+    // 删除日志文件
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error(`无法删除文件: ${err.message}`);
+        return res.status(500).send(LOG_ERR_HTML);
+      }
+      console.log(`文件 ${requestedFile} 已成功删除`);
+      res.redirect('/logs'); // 删除完成后重定向回日志页面
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(LOG_ERR_HTML);
   }
 });
 
