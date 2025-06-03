@@ -141,7 +141,7 @@ async function goTaskCenter(page) {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
-    await page.waitForNetworkIdle({ timeout: 10000 }).catch((err) => {
+    await page.waitForNetworkIdle({ timeout: 30000 }).catch((err) => {
       timeLog('任务中心无事发生');
     });
     timeLog('任务中心签到完成');
@@ -172,6 +172,10 @@ async function autoCheckInRoom(page, roomId) {
         console.warn(`房间 ${roomId} 网络加载超时，但一般没影响`);
         return false;
       });
+
+    // 获取页面标题并打印
+    const title = await page.title();
+    timeLog(`页面标题： ${title}`);
 
     await roomCheckIn(page, roomId);
     await roomPresents(page, roomId);
@@ -379,11 +383,8 @@ async function getTheIframe(page, roomId) {
     console.warn(`房间 ${roomId}：未找到包裹图标`);
   });
   timeLog(`房间 ${roomId}：点击包裹图标`);
-  page.click(SELECTORS.ICON_BAG);
-
-  await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
-    console.warn(`房间 ${roomId}：无事发生`);
-  });
+  await page.click(SELECTORS.ICON_BAG);
+  await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {});
   return findFrame(page.mainFrame(), GIFT_URL_STR);
 }
 
