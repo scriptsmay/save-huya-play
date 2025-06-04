@@ -4,7 +4,7 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const { timeLog } = require('./util/index');
+const { timeLog, sleep } = require('./util/index');
 
 // 定义目标 URL
 const URL_USER = 'https://i.huya.com/';
@@ -15,6 +15,9 @@ const DEFAULT_PRESENT_NUM = process.env.HUYA_ROOM_HULIANG_NUM || 10;
 const SELECTORS = {
   USER_NAME_ELEMENT: '.uesr_n',
   QR_IMAGE_ELEMENT: '#qr-image',
+  // 任务中心
+  SIGN_IN_BTN: '.sign-btn',
+  // 礼物包裹
   BADGE_SELECTOR: '#chatHostPic',
   CHECK_BTN_TEXT: '打卡',
   CPL_BTN_TEXT: '已完成',
@@ -141,9 +144,17 @@ async function goTaskCenter(page) {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
-    await page.waitForNetworkIdle({ timeout: 30000 }).catch((err) => {
-      timeLog('任务中心无事发生');
+    // await sleep(5000);
+    await page.waitForSelector('button').catch((err) => {
+      timeLog('任务中心：未找到按钮');
     });
+    // 等待并点击“签到”按钮
+    await page.click(SELECTORS.SIGN_IN_BTN).catch((err) => {
+      timeLog('未找到“签到”按钮，可能已经签过');
+    });
+
+    // .no-alert 7日不再提醒
+    await sleep(2000);
     timeLog('任务中心签到完成');
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
@@ -370,7 +381,7 @@ async function submitGift(roomId, page, count) {
       console.warn(`房间 ${roomId}：等待赠送按钮 超时`);
     });
   // 等待n秒模拟空闲
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+  await sleep(10000);
 }
 /**
  * 找到弹出的 iframe

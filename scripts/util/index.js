@@ -12,6 +12,16 @@ function timeLog(...args) {
   console.log(timeStr, ...args);
 }
 
+/**
+ * 模拟等待n毫秒
+ * @param {*} ms
+ * @returns
+ */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 module.exports = {
   timeLog,
+  sleep,
 };
