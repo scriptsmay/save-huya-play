@@ -230,13 +230,13 @@ async function roomCheckIn(page, roomId) {
       return page.hover(badgeSelector);
     });
 
+  let setRedisCheckIn = false;
   // 获取所有按钮
   const buttons = await page.$$(`${badgeSelector} a`);
 
   for (const btn of buttons) {
     const text = await btn.evaluate((el) => el.textContent.trim());
 
-    let setRedisCheckIn = false;
     if (text.includes(SELECTORS.CPL_BTN_TEXT)) {
       setRedisCheckIn = true;
       timeLog(`房间 ${roomId}：任务已完成，跳过打卡`);
