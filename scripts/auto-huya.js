@@ -210,6 +210,7 @@ async function roomCheckIn(page, roomId) {
   console.log(status);
   if (status.checked) {
     timeLog(`Redis 读取到房间 ${roomId}：已打卡，跳过打卡`);
+    await sleep(3000);
     return;
   }
 
@@ -235,21 +236,25 @@ async function roomCheckIn(page, roomId) {
   for (const btn of buttons) {
     const text = await btn.evaluate((el) => el.textContent.trim());
 
+    let setRedisCheckIn = false;
     if (text.includes(SELECTORS.CPL_BTN_TEXT)) {
-      const result = await checkInService.setCheckIn(roomId);
-      timeLog(result);
+      setRedisCheckIn = true;
       timeLog(`房间 ${roomId}：任务已完成，跳过打卡`);
       break;
     } else if (text.includes(SELECTORS.CHECK_BTN_TEXT)) {
       timeLog(`房间 ${roomId}：开始打卡`);
       await btn.click();
       timeLog(`房间 ${roomId}：每日打卡福利领取成功`);
+      setRedisCheckIn = true;
 
-      // 用户打卡
-      const result = await checkInService.setCheckIn(roomId);
-      timeLog(result);
       break;
     }
+  }
+
+  if (setRedisCheckIn) {
+    // redis记录用户打卡
+    const result = await checkInService.setCheckIn(roomId);
+    timeLog(result);
   }
 }
 
