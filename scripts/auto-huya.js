@@ -6,6 +6,8 @@ const fs = require('fs');
 
 const { timeLog, sleep } = require('./util/index');
 
+const checkInService = require('./util/checkInService');
+
 // 定义目标 URL
 const URL_USER = 'https://i.huya.com/';
 const TARGET_ROOM_LIST = process.env.HUYA_ROOM_LIST.split(',') || [];
@@ -100,6 +102,9 @@ const GIFT_SUPER_TEXT = '超粉虎粮';
     // 最后打印个时间戳
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
+
+    // 关闭redis
+    await checkInService.close();
   }
 })();
 
@@ -200,6 +205,14 @@ async function autoCheckInRoom(page, roomId) {
  * @param {*} page
  */
 async function roomCheckIn(page, roomId) {
+  // 检查是否已打卡
+  const status = await checkInService.hasCheckedIn(roomId);
+  console.log(status);
+  if (status.checked) {
+    timeLog(`Redis 读取到房间 ${roomId}：已打卡，跳过打卡`);
+    return;
+  }
+
   // 2. 等待徽章元素
   const badgeSelector = SELECTORS.BADGE_SELECTOR;
   await page.waitForSelector(badgeSelector, { timeout: 10000 });
@@ -223,12 +236,18 @@ async function roomCheckIn(page, roomId) {
     const text = await btn.evaluate((el) => el.textContent.trim());
 
     if (text.includes(SELECTORS.CPL_BTN_TEXT)) {
+      const result = await checkInService.setCheckIn(roomId);
+      timeLog(result);
       timeLog(`房间 ${roomId}：任务已完成，跳过打卡`);
       break;
     } else if (text.includes(SELECTORS.CHECK_BTN_TEXT)) {
       timeLog(`房间 ${roomId}：开始打卡`);
       await btn.click();
       timeLog(`房间 ${roomId}：每日打卡福利领取成功`);
+
+      // 用户打卡
+      const result = await checkInService.setCheckIn(roomId);
+      timeLog(result);
       break;
     }
   }
