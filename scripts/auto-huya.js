@@ -218,6 +218,8 @@ async function roomCheckIn(page, roomId) {
   const badgeSelector = SELECTORS.BADGE_SELECTOR;
   await page.waitForSelector(badgeSelector, { timeout: 10000 });
 
+  await sleep(3000);
+
   // 3. hover徽章
   await page.hover(badgeSelector);
   // console.log(`房间 ${roomId}：hover 粉丝牌`);
@@ -225,9 +227,9 @@ async function roomCheckIn(page, roomId) {
   // 4. 等待按钮出现并查找
   await page
     .waitForSelector(`${badgeSelector} a`, { timeout: 10000 })
-    .catch((err) => {
+    .catch(async (err) => {
       timeLog(`房间 ${roomId}：未找到按钮 ${badgeSelector} a，请检查页面结构`);
-      return page.hover(badgeSelector);
+      return await page.click(badgeSelector);
     });
 
   let setRedisCheckIn = false;
