@@ -10,7 +10,17 @@ body {
     ui-sans-serif, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji', emoji;
 }
-
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+li {
+  margin: 5px 0;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
 a {
   text-decoration: none;
 }

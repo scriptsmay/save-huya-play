@@ -1,14 +1,13 @@
 // 本地环境变量
 require('dotenv').config();
 const puppeteer = require('puppeteer');
-const fs = require('fs');
 const { timeLog, sleep } = require('./util/index');
 const checkInService = require('./util/checkInService');
 const config = require('../config/config');
+const huyaUserService = require('./util/huyaUserService');
 const presentService = require('./util/presentService');
 
 // 定义目标 URL
-const URL_USER = config.URLS.URL_HUYA_USER;
 const TARGET_ROOM_LIST = process.env.HUYA_ROOM_LIST.split(',') || [];
 
 // 常量定义
@@ -20,63 +19,26 @@ const SELECTORS = config.HUYA_SELECTORS;
     userDataDir: './user_data', // 指定用户数据目录
     headless: false, // 可视化模式更容易调试
   });
-  const page = await browser.newPage();
-
-  // 检查是否有保存的cookies
-  if (fs.existsSync('cookies.json')) {
-    const cookies = JSON.parse(fs.readFileSync('cookies.json'));
-    await browser.setCookie(...cookies);
-  }
 
   try {
-    // 打开目标页面
-    await page.goto(URL_USER, {
-      waitUntil: 'domcontentloaded',
-      timeout: 10000,
-    });
+    await huyaUserService.userLoginCheck(browser);
 
-    const username = await checkLoginStatus(page);
-    if (!username) {
-      timeLog('正在等待二维码图片加载...60s');
-      await page
-        .waitForSelector(SELECTORS.QR_IMAGE_ELEMENT, { timeout: 30000 })
-        .catch((err) => {
-          console.error('等待二维码元素超时:', err);
-          return;
-        });
+    const page = await browser.newPage();
+    await goTaskCenter(page);
 
-      const qrImgUrl = await page
-        .$eval(SELECTORS.QR_IMAGE_ELEMENT, (el) => el.getAttribute('src'))
-        .catch((err) => {
-          console.error('获取二维码地址失败:', err);
-          return;
-        });
-      timeLog('二维码图片地址:', qrImgUrl);
-      timeLog('请扫码登录...');
-      await page
-        .waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
-        .catch((err) => {
-          console.error('等待页面跳转失败:', err);
-        });
-      timeLog('检测到页面跳转，用户已登录');
+    sleep(3000);
+    await page.close();
 
-      const cookies = await browser.cookies();
-      fs.writeFileSync('cookies.json', JSON.stringify(cookies));
-      timeLog('已保存 cookies 到 cookies.json 文件');
-    } else {
-      await goTaskCenter(page);
-
-      if (!TARGET_ROOM_LIST.length) {
-        console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
-        return;
-      }
-      const newPage = await browser.newPage();
-      for (const roomId of TARGET_ROOM_LIST) {
-        await autoCheckInRoom(newPage, roomId);
-      }
-
-      await newPage.close();
+    if (!TARGET_ROOM_LIST.length) {
+      console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
+      return;
     }
+    const newPage = await browser.newPage();
+    for (const roomId of TARGET_ROOM_LIST) {
+      await autoCheckInRoom(newPage, roomId);
+    }
+
+    await newPage.close();
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -88,32 +50,6 @@ const SELECTORS = config.HUYA_SELECTORS;
     await checkInService.close();
   }
 })();
-
-/**
- * 异步检查登录状态
- *
- * 该函数通过检查页面上是否有特定的用户名称元素来判断用户是否已登录
- * 如果用户已登录，会打印用户名并返回用户名，否则打印用户未登录并返回false
- *
- * @param {Object} page - 一个表示当前页面的对象，用于执行页面操作
- * @returns {Promise<string | boolean>} - 返回用户名（如果已登录）或false（如果未登录）
- */
-async function checkLoginStatus(page) {
-  // 尝试获取页面上的用户名称元素
-  const userElement = await page.$(SELECTORS.USER_NAME_ELEMENT);
-  if (userElement) {
-    // 获取并打印用户名称
-    const username = await page.$eval(SELECTORS.USER_NAME_ELEMENT, (el) =>
-      el.textContent.trim()
-    );
-    timeLog('用户已登录，用户名:', username);
-    return username;
-  } else {
-    // 如果用户名称元素不存在，表示用户未登录
-    timeLog('用户未登录');
-    return false;
-  }
-}
 
 /**
  * 每日任务中心签到任务
@@ -192,7 +128,7 @@ async function autoCheckInRoom(page, roomId) {
 async function roomCheckIn(page, roomId) {
   // 检查是否已打卡
   const status = await checkInService.hasCheckedIn(roomId);
-  console.log(status);
+  // console.log(status);
   if (status.checked) {
     timeLog(`Redis 读取到房间 ${roomId}：已打卡，跳过打卡`);
     await sleep(3000);

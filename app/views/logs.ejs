@@ -3,13 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>日志文件</title>
+    <title><%= title %></title>
     <!-- SVG favicon（现代浏览器） -->
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <!-- https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist -->
     <link href="/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/css/style.css" rel="stylesheet" />
-    <style></style>
   </head>
   <body>
     <div class="container py-3">
@@ -35,8 +34,8 @@
         <div class="col-md-9">
           <% if (selectedFileName) { %>
           <div class="row mb-2">
-            <h2 class="col-md-6">文件名: <%= selectedFileName %></h2>
-            <div class="col-md-6">
+            <h2 class="col-md-8">文件名: <%= selectedFileName %></h2>
+            <div class="col-md-4">
               <a
                 class="btn btn-danger float-end"
                 href="/logs/delete?file=<%= selectedFileName %>"

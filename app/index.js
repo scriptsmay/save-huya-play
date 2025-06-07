@@ -9,6 +9,7 @@ const port = process.env.PORT || 3000;
 
 // 日志目录
 const logsDir = path.join(__dirname, '../logs');
+const screenshotDir = path.join(__dirname, '../logs/screenshot');
 const { LOG_ERR_HTML } = require('./template');
 
 // PostgreSQL 连接配置
@@ -30,6 +31,7 @@ app.use(express.static('public'));
 // 中间件
 app.use((req, res, next) => {
   res.locals.path = req.path;
+  res.locals.title = 'Node.js + PostgreSQL';
   // res.locals.searchTerm = req.query.search || '';
   next();
 });
@@ -149,6 +151,50 @@ app.get('/logs/delete', async (req, res) => {
     console.error(err);
     res.status(500).send(LOG_ERR_HTML);
   }
+});
+
+// 路由：查看 logsDir 目录下的图片文件
+app.get('/screenshot', (req, res) => {
+  try {
+    // 获取目录中的文件列表
+    const files = fs.readdirSync(screenshotDir);
+    const imageFiles = files.filter((file) =>
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
+    );
+
+    // 获取查询参数 ?file=image.jpg
+    const requestedFile = req.query.file;
+    let selectedFilePath = '';
+    let selectedFileName = '';
+
+    if (requestedFile && imageFiles.includes(requestedFile)) {
+      selectedFileName = requestedFile;
+      selectedFilePath = path.join(screenshotDir, requestedFile);
+    }
+
+    // 返回 HTML 页面展示图片列表和选中的图片
+    res.render('screenshot', {
+      imageFiles,
+      selectedFileName,
+      selectedFilePath,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('无法读取图片目录');
+  }
+});
+
+// 允许通过 /screenshot/xxx.jpg 访问实际图片文件
+app.get('/screenshot/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(screenshotDir, filename);
+
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).send('图片不存在');
+    }
+    res.sendFile(filePath);
+  });
 });
 
 app.listen(port, () => {

@@ -6,7 +6,8 @@
     "start": "node app/index.js",
     "test": "node scripts/save-huya-play.js",
     "checkin": "node scripts/auto-huya.js",
-    "kpl": "node scripts/huya-kpl.js"
+    "kpl": "node scripts/huya-kpl.js",
+    "huya": "node scripts/huya-badgelist.js"
   },
   "repository": {
     "type": "git",
