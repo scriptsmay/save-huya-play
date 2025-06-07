@@ -10,6 +10,11 @@ const checkInService = require('./util/checkInService');
 
 // 定义目标 URL
 const URL_USER = 'https://i.huya.com/';
+// kpl直播 URL
+const URL_LIVE_KPL = 'https://www.huya.com/kpl';
+// kpl直播任务 URL
+const URL_TASK_KPL =
+  'https://zt.huya.com/14887334/mobile/index.html?iChannel=1&hideloading=1';
 const TARGET_ROOM_LIST = process.env.HUYA_ROOM_LIST.split(',') || [];
 const DEFAULT_PRESENT_NUM = process.env.HUYA_ROOM_HULIANG_NUM || 10;
 
@@ -95,6 +100,8 @@ const GIFT_SUPER_TEXT = '超粉虎粮';
       for (const roomId of TARGET_ROOM_LIST) {
         await autoCheckInRoom(newPage, roomId);
       }
+
+      await newPage.close();
     }
   } catch (error) {
     console.error('发生错误:', error);
@@ -161,6 +168,7 @@ async function goTaskCenter(page) {
     // .no-alert 7日不再提醒
     await sleep(2000);
     timeLog('任务中心签到完成');
+    await page.close();
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
   }
@@ -442,6 +450,27 @@ function findFrame(frame, urlstr) {
     }
   }
   return null;
+}
+
+async function startKplTask(browser) {
+  const livePage = await openPage(browser, URL_LIVE_KPL);
+  const taskPage = await openPage(browser, URL_TASK_KPL);
+}
+
+async function openPage(browser, url) {
+  try {
+    const page = await browser.newPage();
+    // 打开目标页面
+    await page.goto(url, {
+      waitUntil: 'domcontentloaded',
+      timeout: 10000,
+    });
+
+    return page;
+  } catch (error) {
+    console.error('发生错误:', error);
+    return false;
+  }
 }
 
 // function dumpFrameTree(frame, indent) {
