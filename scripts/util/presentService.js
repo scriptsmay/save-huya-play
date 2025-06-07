@@ -8,6 +8,8 @@ const config = require('../../config/config');
 const SELECTORS = config.HUYA_SELECTORS;
 const GIFT_URL_STR = 'webPackageV2';
 const GIFT_FREE_TEXT = '虎粮';
+const GIFT_KPL_TEXT = '稳住 能赢';
+
 const GIFT_SUPER_TEXT = '超粉虎粮';
 
 const DEFAULT_PRESENT_NUM = +process.env.HUYA_ROOM_HULIANG_NUM || 10;
@@ -19,12 +21,12 @@ async function roomPresents(page, roomId, presentNum = DEFAULT_PRESENT_NUM) {
   timeLog(`房间 ${roomId}：开始进行免费礼物赠送`);
 
   try {
-    let iframePage = await getTheIframe(page, roomId);
+    const frame = await getTheIframe(page, roomId);
 
-    if (!iframePage) {
+    if (!frame) {
+      timeLog(`房间 ${roomId}：未找到礼物iframe`);
       return false;
     }
-    const frame = iframePage; // 更名以避免误解
 
     await frame
       .waitForSelector('.g-package-list', { timeout: 3000 })
@@ -48,7 +50,7 @@ async function getAvailableGifts(frame) {
 
     if (text === GIFT_SUPER_TEXT) {
       availableGifts.super.push(giftIcon);
-    } else if (text === GIFT_FREE_TEXT) {
+    } else if (text === GIFT_FREE_TEXT || text === GIFT_KPL_TEXT) {
       availableGifts.free.push(giftIcon);
     }
   }
@@ -110,6 +112,7 @@ async function submitGift(roomId, page, count) {
  */
 async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
   let availableGifts = await getAvailableGifts(frame);
+  // console.log(`礼物查询结果:`, availableGifts);
 
   // 1. 先送超级礼物
   while (availableGifts.super.length > 0) {

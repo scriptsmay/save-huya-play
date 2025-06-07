@@ -66,7 +66,9 @@ async function startKplTask(browser) {
       await taskPage.waitForSelector(SELECTOR_BTN_GET).catch((err) => {
         timeLog(`未找到元素 ${SELECTOR_BTN_GET}`, err.message);
       });
+      timeLog(`点击领取按钮`);
       await taskPage.click(SELECTOR_BTN_GET);
+      sleep(3000);
     } else {
       timeLog('没有可领取的KPL任务...');
       break;
