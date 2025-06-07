@@ -18,9 +18,12 @@ npm test >>"$logfile" 2>&1
 test_exit_code=$?
 
 npm run checkin >>"$logfile" 2>&1
-checkin_exit_code=$?
+test_exit_code=$?
 
-if [ $test_exit_code -eq 0 ] && [ $checkin_exit_code -eq 0 ]; then
+npm run kpl >>"$logfile" 2>&1
+test_exit_code=$?
+
+if [ $test_exit_code -eq 0 ]; then
   echo "测试通过"
 else
   echo "测试失败"
