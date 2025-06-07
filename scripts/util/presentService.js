@@ -74,7 +74,7 @@ async function sendGiftAndRefresh(roomId, frame, giftIcon, text, count) {
  * 执行赠送虎粮
  * @param {*} roomId
  * @param {*} page
- * @param {number | string} count 是否全部赠送
+ * @param {number | string} count 礼物数量
  */
 async function submitGift(roomId, page, count) {
   timeLog(`房间 ${roomId}：开始赠送礼物`);
@@ -106,7 +106,7 @@ async function submitGift(roomId, page, count) {
 }
 
 /**
- *
+ * 处理礼物frame页面的逻辑
  * @param {*} roomId
  * @param {*} frame
  */
@@ -159,9 +159,10 @@ async function getTheIframe(page, roomId) {
   });
   timeLog(`房间 ${roomId}：点击包裹图标`);
   await page.click(SELECTORS.ICON_BAG);
-  await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
-    console.warn(`房间 ${roomId}：等待网络空闲超时`, err.message);
-  });
+  sleep(5000);
+  // await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
+  //   console.warn(`房间 ${roomId}：等待网络空闲超时`, err.message);
+  // });
   return findFrame(page.mainFrame(), GIFT_URL_STR);
 }
 
