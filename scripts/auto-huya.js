@@ -23,11 +23,7 @@ const SELECTORS = config.HUYA_SELECTORS;
   try {
     await huyaUserService.userLoginCheck(browser);
 
-    const page = await browser.newPage();
-    await goTaskCenter(page);
-
-    await sleep(3000);
-    await page.close();
+    await goTaskCenter(browser);
 
     if (!TARGET_ROOM_LIST.length) {
       console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
@@ -53,13 +49,14 @@ const SELECTORS = config.HUYA_SELECTORS;
 
 /**
  * 每日任务中心签到任务
- * @param {*} page
+ * @param {*} browser
  */
-async function goTaskCenter(page) {
+async function goTaskCenter(browser) {
   if (process.env.HUYA_NOCHECKIN == '1') {
     // 跳过签到
     return false;
   }
+  const page = await browser.newPage();
   const URL_TASK = 'https://hd.huya.com/h5/task_center/index.html';
   try {
     await page.goto(URL_TASK, {
@@ -74,14 +71,13 @@ async function goTaskCenter(page) {
     await page.click(SELECTORS.SIGN_IN_BTN).catch((err) => {
       timeLog('未找到“签到”按钮，可能已经签过', err.message);
     });
-
     // .no-alert 7日不再提醒
     await sleep(2000);
     timeLog('任务中心签到完成');
-    await page.close();
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
   }
+  await page.close();
 }
 
 /**
