@@ -159,10 +159,13 @@ async function getTheIframe(page, roomId) {
   });
   timeLog(`房间 ${roomId}：点击包裹图标`);
   await page.click(SELECTORS.ICON_BAG);
-  sleep(5000);
+  await sleep(2000);
   // await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
   //   console.warn(`房间 ${roomId}：等待网络空闲超时`, err.message);
   // });
+  await page.click(SELECTORS.ICON_BAG);
+  await sleep(5000);
+
   return findFrame(page.mainFrame(), GIFT_URL_STR);
 }
 
