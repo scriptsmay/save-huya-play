@@ -68,7 +68,7 @@ async function startKplTask(browser) {
       });
       timeLog(`点击领取按钮`);
       await taskPage.click(SELECTOR_BTN_GET);
-      sleep(3000);
+      await sleep(3000);
     } else {
       timeLog('没有可领取的KPL任务...');
       break;
@@ -81,7 +81,7 @@ async function startKplTask(browser) {
 
 async function findAvailBtns(page) {
   await page.click('.reward-list-refresh');
-  sleep(1500);
+  await sleep(1500);
 
   const buttons = await page.$$(SELECTOR_BTN_GET);
   const claimBtns = [];
