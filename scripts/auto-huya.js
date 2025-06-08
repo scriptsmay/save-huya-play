@@ -26,7 +26,7 @@ const SELECTORS = config.HUYA_SELECTORS;
     const page = await browser.newPage();
     await goTaskCenter(page);
 
-    sleep(3000);
+    await sleep(3000);
     await page.close();
 
     if (!TARGET_ROOM_LIST.length) {
