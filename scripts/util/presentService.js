@@ -163,10 +163,14 @@ async function getTheIframe(page, roomId) {
   // await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
   //   console.warn(`房间 ${roomId}：等待网络空闲超时`, err.message);
   // });
-  await page.click(SELECTORS.ICON_BAG);
-  await sleep(5000);
+  let frame = findFrame(page.mainFrame(), GIFT_URL_STR);
+  if (!frame) {
+    await page.click(SELECTORS.ICON_BAG);
+    await sleep(5000);
+    frame = findFrame(page.mainFrame(), GIFT_URL_STR);
+  }
 
-  return findFrame(page.mainFrame(), GIFT_URL_STR);
+  return frame;
 }
 
 /**
