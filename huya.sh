@@ -14,9 +14,10 @@ export NVM_DIR="$HOME/.nvm"
 logfile="logs/huya-records.$(date +'%Y%m%d').log"
 
 # 执行测试命令并记录日志
-npm test >>"$logfile" 2>&1
+npm run save >>"$logfile" 2>&1
 npm run kpl >>"$logfile" 2>&1
 npm run checkin >>"$logfile" 2>&1
+npm run huyabadge >>"$logfile" 2>&1
 test_exit_code=$?
 
 if [ $test_exit_code -eq 0 ]; then

@@ -1,11 +1,12 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
+const { getTimestamp } = require('./util/index');
 
 // 定义URL和选择器
 const URL_HUYA_BADGELIST = config.URLS.URL_HUYA_BADGELIST; // 替换为实际URL
 const TABLE_SELECTOR = 'table.table-badge';
-const OUTPUT_FILE = 'logs/screenshot/table-screenshot.png';
+const OUTPUT_FILE = `logs/screenshot/table-screenshot.${getTimestamp()}.png`;
 
 (async () => {
   try {
