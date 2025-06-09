@@ -5,7 +5,7 @@
 cd "$(dirname "$0")" || exit 1
 
 # 创建日志目录（如果不存在）
-mkdir -p logs
+mkdir -p logs/screenshot
 
 # 显式设置 PATH 环境变量，确保 node 和 npm 可用
 export NVM_DIR="$HOME/.nvm"
@@ -15,12 +15,8 @@ logfile="logs/huya-records.$(date +'%Y%m%d').log"
 
 # 执行测试命令并记录日志
 npm test >>"$logfile" 2>&1
-test_exit_code=$?
-
-npm run checkin >>"$logfile" 2>&1
-test_exit_code=$?
-
 npm run kpl >>"$logfile" 2>&1
+npm run checkin >>"$logfile" 2>&1
 test_exit_code=$?
 
 if [ $test_exit_code -eq 0 ]; then
