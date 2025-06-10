@@ -1,7 +1,11 @@
+const path = require('path');
+// const fs = require('fs');
+
 const puppeteer = require('puppeteer');
 const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
 const { getTimestamp } = require('./util/index');
+const msgService = require('./util/msgService');
 
 // 定义URL和选择器
 const URL_HUYA_BADGELIST = config.URLS.URL_HUYA_BADGELIST; // 替换为实际URL
@@ -69,4 +73,16 @@ async function mainTask(browser) {
   });
 
   console.log(`表格截图已保存为: ${OUTPUT_FILE}`);
+
+  // 怎么拿到 OUTPUT_FILE 的绝对路径呢？
+  const outputFile = path.resolve(__dirname, OUTPUT_FILE);
+
+  await msgService
+    .sendPicture(outputFile)
+    .then((res) => {
+      console.log('成功', res);
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 }

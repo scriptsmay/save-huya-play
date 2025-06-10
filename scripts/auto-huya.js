@@ -1,11 +1,12 @@
 // 本地环境变量
 require('dotenv').config();
 const puppeteer = require('puppeteer');
-const { timeLog, sleep } = require('./util/index');
+const { timeLog, sleep, dumpAllMessage } = require('./util/index');
 const checkInService = require('./util/checkInService');
 const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
 const presentService = require('./util/presentService');
+const msgService = require('./util/msgService');
 
 // 定义目标 URL
 const TARGET_ROOM_LIST = process.env.HUYA_ROOM_LIST.split(',') || [];
@@ -44,6 +45,11 @@ const SELECTORS = config.HUYA_SELECTORS;
 
     // 关闭redis
     await checkInService.close();
+
+    // 启用通知服务
+    await msgService.sendMessage('虎牙打卡任务', dumpAllMessage()).then(() => {
+      console.log('消息推送成功');
+    });
   }
 })();
 
@@ -175,7 +181,7 @@ async function roomCheckIn(page, roomId) {
 
   if (setRedisCheckIn) {
     // redis记录用户打卡
-    const result = await checkInService.setCheckIn(roomId);
-    timeLog(result);
+    await checkInService.setCheckIn(roomId);
+    // timeLog(result);
   }
 }

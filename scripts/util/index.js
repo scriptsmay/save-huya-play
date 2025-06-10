@@ -1,3 +1,5 @@
+let globalMsgContent = '';
+
 /**
  * 增加当前时间的日志打印
  * @param {*} msg
@@ -9,7 +11,13 @@ function timeLog(...args) {
     now.getDate()
   )} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}]`;
 
+  globalMsgContent += `${timeStr} ${args.join(' ')}\n`;
+
   console.log(timeStr, ...args);
+}
+
+function dumpAllMessage() {
+  return globalMsgContent;
 }
 
 /**
@@ -43,4 +51,5 @@ module.exports = {
   timeLog,
   sleep,
   getTimestamp,
+  dumpAllMessage,
 };

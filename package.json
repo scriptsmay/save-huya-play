@@ -21,6 +21,7 @@
   "homepage": "https://github.com/scriptsmay/save-huya-play#readme",
   "description": "",
   "dependencies": {
+    "axios": "^1.9.0",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
@@ -33,6 +34,6 @@
     "@eslint/js": "^9.28.0",
     "eslint": "^9.28.0",
     "globals": "^16.2.0",
-    "nodemon": "^2.0.20"
+    "nodemon": "^3.1.10"
   }
 }
