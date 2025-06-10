@@ -82,12 +82,13 @@ async function findTodayScreenshots() {
   }
 }
 
-async function testPic(filepath) {
+async function testPic(filename) {
   // 找到 table-screenshot.20250610_ 以今日日期的图片
-  console.log(filepath);
+  console.log(filename);
+  const url = `http://192.168.31.10:3210/screenshot/${filename}`;
 
   await msgService
-    .sendPicture(filepath)
+    .sendPicture(url)
     .then((res) => {
       console.log('成功', res);
     })
@@ -107,7 +108,7 @@ async function testPic(filepath) {
       );
     });
 
-    await testPic(todayScreenshots[0].path);
+    await testPic(todayScreenshots[0].name);
   } else {
     console.log('未找到今日的截图文件');
   }

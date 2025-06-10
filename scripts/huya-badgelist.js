@@ -1,4 +1,4 @@
-const path = require('path');
+// const path = require('path');
 // const fs = require('fs');
 
 const puppeteer = require('puppeteer');
@@ -10,7 +10,9 @@ const msgService = require('./util/msgService');
 // 定义URL和选择器
 const URL_HUYA_BADGELIST = config.URLS.URL_HUYA_BADGELIST; // 替换为实际URL
 const TABLE_SELECTOR = 'table.table-badge';
-const OUTPUT_FILE = `logs/screenshot/table-screenshot.${getTimestamp()}.png`;
+
+const TARGET_FILENAME = `table-screenshot.${getTimestamp()}.png`;
+const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
 
 (async () => {
   try {
@@ -75,10 +77,10 @@ async function mainTask(browser) {
   console.log(`表格截图已保存为: ${OUTPUT_FILE}`);
 
   // 怎么拿到 OUTPUT_FILE 的绝对路径呢？
-  const outputFile = path.resolve(__dirname, '../', OUTPUT_FILE);
+  const url = `http://192.168.31.10:3210/screenshot/${TARGET_FILENAME}`;
 
   await msgService
-    .sendPicture(outputFile)
+    .sendPicture(url)
     .then((res) => {
       console.log('成功', res);
     })
