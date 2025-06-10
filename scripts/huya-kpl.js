@@ -32,7 +32,7 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
 
   await sleep(5000);
 
-  // 关闭redis
+  // 关闭redis,否则会卡住
   await checkInService.close();
 })();
 
