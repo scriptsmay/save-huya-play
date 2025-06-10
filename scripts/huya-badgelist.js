@@ -75,7 +75,7 @@ async function mainTask(browser) {
   console.log(`表格截图已保存为: ${OUTPUT_FILE}`);
 
   // 怎么拿到 OUTPUT_FILE 的绝对路径呢？
-  const outputFile = path.resolve(__dirname, OUTPUT_FILE);
+  const outputFile = path.resolve(__dirname, '../', OUTPUT_FILE);
 
   await msgService
     .sendPicture(outputFile)
