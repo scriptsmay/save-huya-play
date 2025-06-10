@@ -6,6 +6,7 @@ const config = require('../config/config');
 
 const huyaUserService = require('./util/huyaUserService');
 const presentService = require('./util/presentService');
+const checkInService = require('./util/checkInService');
 
 // 常量定义
 const SELECTOR_BTN_GET = '.hy-mission-btn--get';
@@ -28,6 +29,11 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
   }
+
+  await sleep(5000);
+
+  // 关闭redis
+  await checkInService.close();
 })();
 
 /**
@@ -102,7 +108,7 @@ async function openPage(browser, url) {
     // 打开目标页面
     await page.goto(url, {
       waitUntil: 'domcontentloaded',
-      timeout: 10000,
+      timeout: 15000,
     });
 
     return page;
