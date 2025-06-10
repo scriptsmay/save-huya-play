@@ -1,5 +1,5 @@
 require('dotenv').config();
-// const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
@@ -67,16 +67,40 @@ async function sendMessage(title, content, description = '') {
   }
 }
 
-function createFileUri(filePath) {
-  // 转换路径为绝对路径并处理Windows的反斜杠
-  const absolutePath = path.resolve(filePath).replace(/\\/g, '/');
-  console.log(process.platform);
+// function createFileUri(filePath) {
+//   // 转换路径为绝对路径并处理Windows的反斜杠
+//   const absolutePath = path.resolve(filePath).replace(/\\/g, '/');
+//   console.log(process.platform);
 
-  // 构造file URI (Windows需要额外的斜杠)
-  if (process.platform === 'win32') {
-    return `file:///${absolutePath}`;
+//   // 构造file URI (Windows需要额外的斜杠)
+//   if (process.platform === 'win32') {
+//     return `file:///${absolutePath}`;
+//   }
+//   return `file://${absolutePath}`;
+// }
+
+async function imageToBase64(filePath) {
+  try {
+    // 读取图片文件
+    const imageBuffer = await fs.readFile(filePath);
+
+    // 转换为base64字符串
+    const base64String = imageBuffer.toString('base64');
+
+    // 获取文件扩展名
+    const extname = path.extname(filePath).substring(1);
+
+    // 构建完整的数据URI
+    const dataURI = `data:image/${extname};base64,${base64String}`;
+
+    return {
+      base64: base64String,
+      dataURI: dataURI,
+    };
+  } catch (error) {
+    console.error('转换失败:', error);
+    throw error;
   }
-  return `file://${absolutePath}`;
 }
 
 /**
@@ -86,6 +110,7 @@ function createFileUri(filePath) {
  */
 async function sendPicture(filepath) {
   try {
+    const imgBase64 = await imageToBase64(filepath);
     const API = 'http://192.168.31.10:3000/send_group_msg';
     const postData = {
       group_id: 1034923436,
@@ -93,7 +118,7 @@ async function sendPicture(filepath) {
         {
           type: 'image',
           data: {
-            file: createFileUri(filepath), // 图片文件本地路径
+            file: imgBase64.dataURI, // 图片文件本地路径
             // "url": "https://xxx",   // 图片URL
             // "md5": "3F7D797BE1AF0A" // 图片md5 (大写)
           },
