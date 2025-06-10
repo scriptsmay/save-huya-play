@@ -35,6 +35,18 @@ const HUYA_SELECTORS = {
   HUYA_POINTS: '.cursor-pointer .text-yellow-100',
 };
 
+const qqMsgTpl = {
+  group_id: 1034923436,
+  message: [
+    {
+      type: 'text',
+      data: {
+        text: '{{title}}\n{{content}}',
+      },
+    },
+  ],
+};
+
 const config = {
   huya: [
     {
@@ -60,6 +72,17 @@ const config = {
     URL_HUYA_TASK_CENTER,
   },
   HUYA_SELECTORS,
+
+  apiConfig: [
+    {
+      type: 'qq',
+      url: 'http://192.168.31.10:3000/send_group_msg',
+      method: 'post',
+      dataTpl: JSON.stringify(qqMsgTpl),
+    },
+    // 可以添加更多类型的API地址
+    // { type: 'wechat', url: 'http://example.com/wechat_api' }
+  ],
 };
 
 module.exports = config;
