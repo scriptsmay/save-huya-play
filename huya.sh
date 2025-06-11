@@ -26,9 +26,9 @@ run_npm() {
   local exit_code=$?
   if [ $exit_code -ne 0 ]; then
     log "错误: npm run $script_name 失败，退出码: $exit_code"
-    exit 1
+  else
+    log "完成: npm run $script_name"
   fi
-  log "完成: npm run $script_name"
 }
 
 # 执行任务序列
