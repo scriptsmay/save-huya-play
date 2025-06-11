@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const morgan = require('morgan'); // 引入morgan日志中间件
+const ejsLayouts = require('express-ejs-layouts');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,6 +30,7 @@ const pool = new Pool({
 // 设置模板引擎
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(ejsLayouts);
 
 // 静态文件
 app.use(express.static('public'));
@@ -37,14 +39,14 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
 // 新增: 使用morgan记录访问日志
-// 参数有 combined short
-app.use(morgan('short')); // 使用 combined 格式记录日志
+// 参数有 combined short dev
+const morganFormat = 'dev';
+app.use(morgan(morganFormat)); // 使用 combined 格式记录日志
 
 // 中间件
 app.use((req, res, next) => {
   res.locals.path = req.path;
   res.locals.title = 'Node.js + PostgreSQL';
-  // res.locals.searchTerm = req.query.search || '';
   next();
 });
 
@@ -107,6 +109,10 @@ app.get('/', async (req, res) => {
 // 路由：查看 logs 目录下的 .log 文件
 app.get('/logs', async (req, res) => {
   try {
+    // 如果没有 logsDir 这个目录，则创建它
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir);
+    }
     // 获取目录中的文件列表
     const files = fs.readdirSync(logsDir);
     const logFiles = files.filter((file) => file.endsWith('.log'));
@@ -168,6 +174,10 @@ app.get('/logs/delete', async (req, res) => {
 // 路由：查看 logsDir 目录下的图片文件
 app.get('/screenshot', (req, res) => {
   try {
+    // 如果没有 screenshotDir 这个目录，则创建它
+    if (!fs.existsSync(screenshotDir)) {
+      fs.mkdirSync(screenshotDir);
+    }
     // 获取目录中的文件列表
     const files = fs.readdirSync(screenshotDir);
     const imageFiles = files.filter((file) =>
@@ -207,6 +217,39 @@ app.get('/screenshot/:filename', (req, res) => {
     }
     res.sendFile(filePath);
   });
+});
+
+// 路由：删除指定名称的日志文件
+app.get('/screenshot-delete', async (req, res) => {
+  try {
+    // 获取目录中的文件列表
+    const files = fs.readdirSync(screenshotDir);
+    const imageFiles = files.filter((file) =>
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
+    );
+
+    // 获取查询参数 ?file=xxx.log
+    const requestedFile = req.query.file;
+
+    if (!requestedFile || !imageFiles.includes(requestedFile)) {
+      return res.status(400).send(LOG_ERR_HTML);
+    }
+
+    const filePath = path.join(screenshotDir, requestedFile);
+
+    // 删除日志文件
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error(`无法删除文件: ${err.message}`);
+        return res.status(500).send(LOG_ERR_HTML);
+      }
+      console.log(`文件 ${requestedFile} 已成功删除`);
+      res.redirect('/screenshot'); // 删除完成后重定向回日志页面
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(LOG_ERR_HTML);
+  }
 });
 
 // 新增: GET /api 路由，返回欢迎信息

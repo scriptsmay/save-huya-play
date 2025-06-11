@@ -36,4 +36,5 @@ const LOG_ERR_HTML = `
 
 module.exports = {
   LOG_ERR_HTML,
+  DEFAULT_ERR_HTML,
 };
