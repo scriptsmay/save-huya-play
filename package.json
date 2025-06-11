@@ -7,7 +7,8 @@
     "save": "node scripts/save-huya-play.js",
     "checkin": "node scripts/auto-huya.js",
     "kpl": "node scripts/huya-kpl.js",
-    "huyabadge": "node scripts/huya-badgelist.js"
+    "huyabadge": "node scripts/huya-badgelist.js",
+    "douyu": "node scripts/douyu-checkin.js"
   },
   "repository": {
     "type": "git",
