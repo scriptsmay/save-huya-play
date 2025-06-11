@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const { timeLog, sleep } = require('./index');
 const config = require('../../config/config');
+const checkInService = require('./checkInService');
 
 // 常量定义
 const SELECTORS = config.HUYA_SELECTORS;
@@ -18,6 +19,13 @@ const DEFAULT_PRESENT_NUM = +process.env.HUYA_ROOM_HULIANG_NUM || 10;
  * @param {*} page
  */
 async function roomPresents(page, roomId, presentNum = DEFAULT_PRESENT_NUM) {
+  // 检查是否已送礼
+  const status = await checkInService.hasGift(roomId);
+  if (status.checked) {
+    timeLog(`Redis 读取到房间 ${roomId}：已赠送虎粮，跳过赠送`);
+    await sleep(3000);
+    return;
+  }
   timeLog(`房间 ${roomId}：开始进行免费礼物赠送`);
 
   try {
@@ -97,6 +105,9 @@ async function submitGift(roomId, page, count) {
       await page.click(SELECTORS.PRESENT_SUBMIT);
 
       timeLog(`房间 ${roomId}：赠送成功 ${count} 个`);
+
+      // redis记录用户虎粮
+      await checkInService.setGift(roomId);
     })
     .catch((err) => {
       console.warn(`房间 ${roomId}：等待赠送按钮 超时`, err.message);
