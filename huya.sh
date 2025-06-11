@@ -13,16 +13,31 @@ export NVM_DIR="$HOME/.nvm"
 
 logfile="logs/huya-records.$(date +'%Y%m%d').log"
 
-# 执行测试命令并记录日志
-npm run save >> "$logfile" 2>&1
-npm run kpl >> "$logfile" 2>&1
-npm run checkin >> "$logfile" 2>&1
-npm run huyabadge >> "$logfile" 2>&1
-test_exit_code=$?
+# 添加带时间戳的日志函数
+log() {
+  echo "[$(date +'%Y-%m-%d %T')] $*"
+}
 
-if [ $test_exit_code -eq 0 ]; then
-  echo "测试通过"
-else
-  echo "测试失败"
-  exit 1
-fi
+# 封装 npm run 执行逻辑
+run_npm() {
+  local script_name="$1"
+  log "开始执行: npm run $script_name"
+  npm run "$script_name" >>"$logfile" 2>&1
+  local exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    log "错误: npm run $script_name 失败，退出码: $exit_code"
+    exit 1
+  fi
+  log "完成: npm run $script_name"
+}
+
+# 执行任务序列
+run_npm save
+sleep 5
+run_npm kpl
+sleep 5
+run_npm checkin
+sleep 5
+run_npm huyabadge
+
+echo "执行完毕"
