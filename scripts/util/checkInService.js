@@ -16,11 +16,10 @@ function getSecondsUntilMidnight() {
 }
 
 class CheckInService {
-  async setCheckIn(userId) {
+  async setCheckIn(userId, platform = 'huya') {
     try {
-
       // 存储打卡ID，设置过期时间
-      await redisClient.set(`checkin:${userId}`, '1', {
+      await redisClient.set(`checkin:${platform}:${userId}`, '1', {
         EX: getSecondsUntilMidnight(),
       });
 
@@ -31,11 +30,9 @@ class CheckInService {
     }
   }
 
-
-
-  async hasCheckedIn(userId) {
+  async hasCheckedIn(userId, platform = 'huya') {
     try {
-      const result = await redisClient.get(`checkin:${userId}`);
+      const result = await redisClient.get(`checkin:${platform}:${userId}`);
       return { checked: result !== null };
     } catch (err) {
       console.error('检查打卡状态失败:', err);
@@ -45,12 +42,11 @@ class CheckInService {
 
   /**
    * 已送礼
-   * @param {*} userId 
-   * @returns 
+   * @param {*} userId
+   * @returns
    */
   async setGift(userId) {
     try {
-
       // 存储打卡ID，设置过期时间
       await redisClient.set(`gift:${userId}`, '1', {
         EX: getSecondsUntilMidnight(),

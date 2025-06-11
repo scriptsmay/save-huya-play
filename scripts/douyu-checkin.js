@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 const { timeLog, sleep, dumpAllMessage } = require('./util/index');
 const douyuUserService = require('./util/douyuUserService');
 const msgService = require('./util/msgService');
+const checkInService = require('./util/checkInService');
 const config = require('../config/config');
 
 // 签到 按钮
@@ -29,6 +30,9 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
 
+    // 关闭redis
+    await checkInService.close();
+
     // 启用通知服务
     await msgService.sendMessage('斗鱼打卡任务', dumpAllMessage()).then(() => {
       console.log('消息推送成功');
@@ -44,6 +48,14 @@ async function goTaskCenter(browser) {
   if (process.env.DOUYU_NOCHECKIN == '1') {
     // 跳过签到
     return false;
+  }
+  // 检查是否已打卡
+  const status = await checkInService.hasCheckedIn('user', 'douyu');
+  // console.log(status);
+  if (status.checked) {
+    timeLog(`Redis 读取到斗鱼已签到，跳过执行`);
+    await sleep(3000);
+    return;
   }
   const page = await browser.newPage();
   const URL_TASK = config.URLS.URL_DOUYU_POINT_PAGE;
@@ -63,6 +75,8 @@ async function goTaskCenter(browser) {
     if (result) {
       timeLog('点击签到按钮');
       await page.click(signSelector);
+      // redis记录一下
+      await checkInService.setCheckIn('user', 'douyu');
       timeLog('等待10s自动领取积分');
       await sleep(10000);
       timeLog('任务中心签到完成');
