@@ -43,12 +43,18 @@ const URL_DOUYU_USER = 'https://www.douyu.com/member/cp';
 const DOUYU_SELECTORS = {
   USER_NAME_ELEMENT: '.uname_con',
   QR_IMAGE_ELEMENT: '.qrcode-img',
-  // 积分页面
-  POINT_ELEMENT: '.task-score',
-  // 签到按钮
-  SIGN_IN_BTN: '.task-sign',
-  // 签到成功提示
-  SIGN_IN_SUCCESS: '.task-sign-success',
+  // 去试玩
+  POINT_JUMP_BTN: '.Task-module__taskBtnUnfinished-1tkzh',
+  // 领取积分
+  POINT_GET_BTN: '.Task-module__taskBtnWait-zpPtT',
+  // 签到积分领取按钮
+  SIGN_POINT_GET_BTN: '.LiveBox-module__wait-3DZXC',
+
+  MY_POINT_NUM: '.Header-module__headerScoreNum-MCqHN',
+  // // 签到按钮
+  // SIGN_IN_BTN: '.task-sign',
+  // // 签到成功提示
+  // SIGN_IN_SUCCESS: '.task-sign-success',
 };
 
 const qqMsgTpl = {
