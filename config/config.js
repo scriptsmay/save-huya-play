@@ -35,6 +35,22 @@ const HUYA_SELECTORS = {
   HUYA_POINTS: '.cursor-pointer .text-yellow-100',
 };
 
+// 斗鱼页面常量
+// 积分页面
+const URL_DOUYU_POINT_PAGE = 'https://www.douyu.com/pages/ord-task-center';
+// 个人中心
+const URL_DOUYU_USER = 'https://www.douyu.com/member/cp';
+const DOUYU_SELECTORS = {
+  USER_NAME_ELEMENT: '.uname_con',
+  QR_IMAGE_ELEMENT: '.qrcode-img',
+  // 积分页面
+  POINT_ELEMENT: '.task-score',
+  // 签到按钮
+  SIGN_IN_BTN: '.task-sign',
+  // 签到成功提示
+  SIGN_IN_SUCCESS: '.task-sign-success',
+};
+
 const qqMsgTpl = {
   group_id: 1034923436,
   message: [
@@ -70,8 +86,11 @@ const config = {
     URL_HUYA_TASK_KPL,
     URL_HUYA_BADGELIST,
     URL_HUYA_TASK_CENTER,
+    URL_DOUYU_POINT_PAGE,
+    URL_DOUYU_USER,
   },
   HUYA_SELECTORS,
+  DOUYU_SELECTORS,
 
   apiConfig: [
     {
