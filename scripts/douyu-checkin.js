@@ -49,14 +49,7 @@ async function goTaskCenter(browser) {
     // 跳过签到
     return false;
   }
-  // 检查是否已打卡
-  const status = await checkInService.hasCheckedIn('user', 'douyu');
-  // console.log(status);
-  if (status.checked) {
-    timeLog(`Redis 读取到斗鱼已签到，跳过执行`);
-    await sleep(3000);
-    return;
-  }
+
   const page = await browser.newPage();
   const URL_TASK = config.URLS.URL_DOUYU_POINT_PAGE;
   try {
@@ -66,20 +59,26 @@ async function goTaskCenter(browser) {
       timeout: 30000,
     });
     await sleep(5000);
-
-    const result = await page
-      .waitForSelector(signSelector, { timeout: 10000 })
-      .catch((err) => {
-        console.log(`未找到元素 ${signSelector}`, err.message);
-      });
-    if (result) {
-      timeLog('点击签到按钮');
-      await page.click(signSelector);
-      // redis记录一下
-      await checkInService.setCheckIn('user', 'douyu');
-      timeLog('等待10s自动领取积分');
-      await sleep(10000);
-      timeLog('任务中心签到完成');
+    // 检查是否已打卡
+    const status = await checkInService.hasCheckedIn('user', 'douyu');
+    // console.log(status);
+    if (status.checked) {
+      timeLog(`Redis 读取到斗鱼已签到，跳过执行`);
+    } else {
+      const result = await page
+        .waitForSelector(signSelector, { timeout: 10000 })
+        .catch((err) => {
+          console.log(`未找到元素 ${signSelector}`, err.message);
+        });
+      if (result) {
+        timeLog('点击签到按钮');
+        await page.click(signSelector);
+        // redis记录一下
+        await checkInService.setCheckIn('user', 'douyu');
+        timeLog('等待10s自动领取积分');
+        await sleep(10000);
+        timeLog('任务中心签到完成');
+      }
     }
 
     // 签到积分
