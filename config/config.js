@@ -63,7 +63,7 @@ const qqMsgTpl = {
     {
       type: 'text',
       data: {
-        text: '{{title}}\n{{content}}',
+        text: '{{title}}\n{{content}}\n',
       },
     },
   ],

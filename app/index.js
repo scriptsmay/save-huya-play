@@ -333,6 +333,81 @@ app.get('/api/notify', async (req, res) => {
   }
 });
 
+app.post('/api/notify', async (req, res) => {
+  try {
+    let { title = '', content = '', type = 'qq' } = req.query;
+    // const postData = req.body;
+    console.log('[DEBUG]request data:----->', req.body);
+    const { pic_url = '', jump_url = '' } = req.body;
+    if (req.body.title) {
+      title = req.body.title;
+    }
+    if (req.body.content) {
+      content = req.body.content;
+    }
+
+    // 根据type查找对应的API地址
+    const apiConfig = config.apiConfig.find((item) => item.type === type);
+    if (!apiConfig) {
+      return res.status(403).json({
+        error: '不支持的type类型',
+      });
+    }
+
+    let dataStr = apiConfig.dataTpl
+      ? apiConfig.dataTpl
+          .replace('{{title}}', title)
+          .replace('{{content}}', content)
+      : '{}';
+    const msgData = JSON.parse(dataStr);
+    if (type == 'qq') {
+      if (pic_url) {
+        msgData.message.push({
+          type: 'image',
+          data: {
+            url: pic_url,
+          },
+        });
+      }
+      if (jump_url) {
+        msgData.message.push({
+          type: 'text',
+          data: { text: `Go： ${jump_url}` },
+        });
+      }
+    }
+    // 转发请求
+    const response = await axios({
+      url: apiConfig.url,
+      method: apiConfig.method || 'get',
+      data: msgData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // 将目标服务的响应返回给客户端
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error('转发请求时出错:', error);
+
+    // 错误处理
+    if (error.response) {
+      // 目标服务器返回了错误响应
+      res.status(error.response.status).json({
+        error: '转发请求失败',
+        details: error.response.data,
+      });
+    } else {
+      // 其他类型的错误
+      res.status(500).json({
+        error: '内部服务器错误',
+        details: error.message,
+      });
+    }
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
