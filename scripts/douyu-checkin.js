@@ -1,6 +1,11 @@
 require('dotenv').config();
 const puppeteer = require('puppeteer');
-const { timeLog, sleep, dumpAllMessage } = require('./util/index');
+const {
+  timeLog,
+  sleep,
+  dumpAllMessage,
+  getTimestamp,
+} = require('./util/index');
 const douyuUserService = require('./util/douyuUserService');
 const msgService = require('./util/msgService');
 const checkInService = require('./util/checkInService');
@@ -96,12 +101,10 @@ async function goTaskCenter(browser) {
     console.error(`打开任务中心 ${URL_TASK} 发生错误:`, error);
   }
 
-  console.log('截个图看看');
-  await page.screenshot({ path: 'logs/screenshot/douyu_task.png' });
-
   await goGameTask(browser, page);
-
   await sleep(5000);
+  await goScreenShot(page);
+
   await page.close();
 
   // 查询当前积分
@@ -171,4 +174,26 @@ async function queryPoint(browser) {
   } finally {
     await page.close();
   }
+}
+
+async function goScreenShot(page) {
+  const TARGET_FILENAME = `douyu_task.${getTimestamp()}.png`;
+  const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
+  // console.log('截个图看看');
+  // 设置视口大小
+  await page.setViewport({ width: 568, height: 1024 });
+  await page.screenshot({ path: OUTPUT_FILE });
+
+  console.log(`截图已保存为: ${OUTPUT_FILE}`);
+  const url = `http://192.168.31.10:3210/screenshot/${TARGET_FILENAME}`;
+  await msgService
+    .sendPicture(url)
+    .then((res) => {
+      console.log('成功', res);
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+
+  await sleep(5000);
 }

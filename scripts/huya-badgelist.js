@@ -75,8 +75,6 @@ async function mainTask(browser) {
   });
 
   console.log(`表格截图已保存为: ${OUTPUT_FILE}`);
-
-  // 怎么拿到 OUTPUT_FILE 的绝对路径呢？
   const url = `http://192.168.31.10:3210/screenshot/${TARGET_FILENAME}`;
 
   await msgService
