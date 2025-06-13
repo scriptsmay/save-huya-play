@@ -109,6 +109,8 @@ async function goTaskCenter(browser) {
 }
 
 async function goGameTask(browser, page) {
+  timeLog('开始执行`做任务领积分`游戏任务...');
+  await sleep(5000);
   const tasks = await page.$$(config.DOUYU_SELECTORS.POINT_JUMP_BTN);
   if (tasks.length > 0) {
     for (const task of tasks) {
@@ -138,7 +140,7 @@ async function goGameTask(browser, page) {
       timeLog('没有可领取的按钮了');
       break;
     }
-    timeLog('点击`做任务领积分`按钮');
+    timeLog('点击`领取`按钮');
     await btn.click();
     await sleep(3000);
 
@@ -147,11 +149,6 @@ async function goGameTask(browser, page) {
     await sleep(5000);
   }
 }
-
-// async function getPointBtns(page) {
-//   const getBtn = await page.$(config.DOUYU_SELECTORS.POINT_GET_BTN);
-//   return getBtn;
-// }
 
 async function queryPoint(browser) {
   const page = await browser.newPage();
