@@ -333,10 +333,14 @@ app.get('/api/notify', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/notify
+ * @param {*} req body { title: '标题', content: '内容', type: '', pic_url: '', jump_url: '' }
+ * @param {*} res
+ */
 app.post('/api/notify', async (req, res) => {
   try {
     let { title = '', content = '', type = 'qq' } = req.query;
-    // const postData = req.body;
     console.log('[DEBUG]request data:----->', req.body);
     const { pic_url = '', jump_url = '' } = req.body;
     if (req.body.title) {
@@ -360,6 +364,7 @@ app.post('/api/notify', async (req, res) => {
           .replace('{{content}}', content)
       : '{}';
     const msgData = JSON.parse(dataStr);
+    // QQ允许转发图片和跳转链接
     if (type == 'qq') {
       if (pic_url) {
         msgData.message.push({
