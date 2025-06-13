@@ -10,6 +10,8 @@ const msgService = require('./util/msgService');
 
 // 定义目标 URL
 const TARGET_ROOM_LIST = process.env.HUYA_ROOM_LIST.split(',') || [];
+const totalRoomCount = TARGET_ROOM_LIST.length;
+let roomCount = 0;
 
 // 常量定义
 const SELECTORS = config.HUYA_SELECTORS;
@@ -27,12 +29,20 @@ const SELECTORS = config.HUYA_SELECTORS;
 
     await goTaskCenter(browser);
 
-    if (!TARGET_ROOM_LIST.length) {
+    if (!totalRoomCount) {
       console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
       return;
     }
-    const newPage = await browser.newPage();
+    timeLog(`共需要打卡的虎牙直播间：${totalRoomCount}个`);
+    let newPage = await browser.newPage();
     for (const roomId of TARGET_ROOM_LIST) {
+      if (roomCount == 5) {
+        await sleep(3000);
+        await newPage.close();
+        timeLog('已打开5个页面，先关闭页面，等待60s再继续操作，以增加容错...');
+        await sleep(60000);
+        newPage = await browser.newPage();
+      }
       await autoCheckInRoom(newPage, roomId);
     }
 
@@ -133,7 +143,10 @@ async function roomCheckIn(page, roomId) {
   const status = await checkInService.hasCheckedIn(roomId);
   // console.log(status);
   if (status.checked) {
-    timeLog(`Redis 读取到房间 ${roomId}：已打卡，跳过打卡`);
+    roomCount += 1;
+    timeLog(
+      `Redis 读取到房间 ${roomId}：已打卡，跳过打卡...[${roomCount}/${totalRoomCount}]`
+    );
     await sleep(3000);
     return;
   }
@@ -168,10 +181,12 @@ async function roomCheckIn(page, roomId) {
 
     if (text.includes(SELECTORS.CPL_BTN_TEXT)) {
       setRedisCheckIn = true;
-      timeLog(`房间 ${roomId}：任务已完成，跳过打卡`);
+      timeLog(
+        `房间 ${roomId}：已完成，跳过打卡 [${roomCount}/${totalRoomCount}]`
+      );
       break;
     } else if (text.includes(SELECTORS.CHECK_BTN_TEXT)) {
-      timeLog(`房间 ${roomId}：开始打卡`);
+      timeLog(`房间 ${roomId}：开始打卡...[${roomCount}/${totalRoomCount}]`);
       await btn.click();
       timeLog(`房间 ${roomId}：每日打卡福利领取成功`);
       setRedisCheckIn = true;
@@ -184,5 +199,6 @@ async function roomCheckIn(page, roomId) {
     // redis记录用户打卡
     await checkInService.setCheckIn(roomId);
     // timeLog(result);
+    roomCount += 1;
   }
 }
