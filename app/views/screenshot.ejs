@@ -30,10 +30,16 @@
       </div>
     </div>
     <div class="border rounded bg-light">
-      <img
-        src="/screenshot/<%= encodeURIComponent(selectedFileName) %>"
-        alt="<%= selectedFileName %>"
-      />
+      <a
+        target="_blank"
+        href="/screenshot/<%= encodeURIComponent(selectedFileName) %>"
+      >
+        <img
+          class="img-fluid"
+          src="/screenshot/<%= encodeURIComponent(selectedFileName) %>"
+          alt="<%= selectedFileName %>"
+        />
+      </a>
     </div>
     <% } else { %>
     <p class="text-muted">请从左侧选择一张图片查看。</p>

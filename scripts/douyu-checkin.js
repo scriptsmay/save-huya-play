@@ -134,10 +134,13 @@ async function goGameTask(browser, page) {
       await newPage.close();
       await sleep(5000);
     }
-    await page.reload();
   }
 
   while (true) {
+    timeLog('刷新页面，等待5s...');
+    await page.reload();
+    await sleep(5000);
+
     const btn = await page.$(config.DOUYU_SELECTORS.POINT_GET_BTN);
     if (!btn) {
       timeLog('没有可领取的按钮了');
@@ -146,10 +149,6 @@ async function goGameTask(browser, page) {
     timeLog('点击`领取`按钮');
     await btn.click();
     await sleep(3000);
-
-    timeLog('刷新页面，等待5s...');
-    await page.reload();
-    await sleep(5000);
   }
 }
 
