@@ -6,6 +6,7 @@ const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
 const { getTimestamp, timeLog } = require('./util/index');
 const msgService = require('./util/msgService');
+const checkInService = require('./util/checkInService');
 
 // 定义URL和选择器
 const URL_HUYA_BADGELIST = config.URLS.URL_HUYA_BADGELIST; // 替换为实际URL
@@ -15,14 +16,13 @@ const TARGET_FILENAME = `table-screenshot.${getTimestamp()}.png`;
 const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
 
 (async () => {
+  // 启动浏览器
+  const browser = await puppeteer.launch({
+    userDataDir: './user_data', // 指定用户数据目录
+    headless: 'new', // 使用新的Headless模式
+    args: ['--no-sandbox', '--disable-setuid-sandbox'], // 适用于某些Linux环境
+  });
   try {
-    // 启动浏览器
-    const browser = await puppeteer.launch({
-      userDataDir: './user_data', // 指定用户数据目录
-      headless: 'new', // 使用新的Headless模式
-      args: ['--no-sandbox', '--disable-setuid-sandbox'], // 适用于某些Linux环境
-    });
-
     const isLoggedIn = await huyaUserService.userLoginCheck(browser);
     if (!isLoggedIn) {
       timeLog('虎牙用户未登录');
@@ -30,12 +30,14 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
     }
 
     await mainTask(browser);
-
-    // 关闭浏览器
-    await browser.close();
   } catch (error) {
-    console.error('执行过程中出错:', error);
-    process.exit(1);
+    console.error('执行过程中出错:', error.message);
+  } finally {
+    // 最后打印个时间戳
+    timeLog('所有任务完成，正在关闭浏览器...');
+    await browser.close();
+    // 关闭redis,否则会卡住
+    await checkInService.close();
   }
 })();
 

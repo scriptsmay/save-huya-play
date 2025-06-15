@@ -33,7 +33,7 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
 
     await goTaskCenter(browser);
   } catch (error) {
-    console.error('发生错误:', error);
+    console.error('发生错误:', error.message);
   } finally {
     // 最后打印个时间戳
     timeLog('所有任务完成，正在关闭浏览器...');

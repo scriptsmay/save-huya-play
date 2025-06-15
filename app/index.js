@@ -341,7 +341,7 @@ app.get('/api/notify', async (req, res) => {
 app.post('/api/notify', async (req, res) => {
   try {
     let { title = '', content = '', type = 'qq' } = req.query;
-    console.log('[DEBUG]request data:----->', req.body);
+    // console.log('[DEBUG]request data:----->', req.body);
     const { pic_url = '', jump_url = '' } = req.body;
     if (req.body.title) {
       title = req.body.title;
