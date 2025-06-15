@@ -3,10 +3,10 @@ require('dotenv').config();
 const puppeteer = require('puppeteer');
 const { timeLog, sleep } = require('./util/index');
 const config = require('../config/config');
+const redisClient = require('../config/redis');
 
 const huyaUserService = require('./util/huyaUserService');
 const presentService = require('./util/presentService');
-const checkInService = require('./util/checkInService');
 
 // 常量定义
 const SELECTOR_BTN_GET = '.hy-mission-btn--get';
@@ -38,7 +38,7 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
   await sleep(5000);
 
   // 关闭redis,否则会卡住
-  await checkInService.close();
+  await redisClient.disconnect();
 })();
 
 /**

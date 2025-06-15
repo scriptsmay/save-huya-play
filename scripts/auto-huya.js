@@ -1,6 +1,8 @@
 // 本地环境变量
 require('dotenv').config();
 const puppeteer = require('puppeteer');
+const redisClient = require('../config/redis');
+
 const { timeLog, sleep, dumpAllMessage } = require('./util/index');
 const checkInService = require('./util/checkInService');
 const config = require('../config/config');
@@ -59,7 +61,7 @@ const SELECTORS = config.HUYA_SELECTORS;
     await browser.close();
 
     // 关闭redis
-    await checkInService.close();
+    await redisClient.disconnect();
 
     // 启用通知服务
     await msgService.sendMessage('虎牙打卡任务', dumpAllMessage()).then(() => {

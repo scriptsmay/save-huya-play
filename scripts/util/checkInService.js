@@ -68,10 +68,6 @@ class CheckInService {
       return { checked: false, error: err.message };
     }
   }
-
-  async close() {
-    await redisClient.disconnect();
-  }
 }
 
 module.exports = new CheckInService();

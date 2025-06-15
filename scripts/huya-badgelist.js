@@ -3,10 +3,11 @@
 
 const puppeteer = require('puppeteer');
 const config = require('../config/config');
+const redisClient = require('../config/redis');
+
 const huyaUserService = require('./util/huyaUserService');
 const { getTimestamp, timeLog } = require('./util/index');
 const msgService = require('./util/msgService');
-const checkInService = require('./util/checkInService');
 
 // 定义URL和选择器
 const URL_HUYA_BADGELIST = config.URLS.URL_HUYA_BADGELIST; // 替换为实际URL
@@ -37,7 +38,7 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
     // 关闭redis,否则会卡住
-    await checkInService.close();
+    await redisClient.disconnect();
   }
 })();
 

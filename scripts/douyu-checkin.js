@@ -6,6 +6,8 @@ const {
   dumpAllMessage,
   getTimestamp,
 } = require('./util/index');
+const redisClient = require('../config/redis');
+
 const douyuUserService = require('./util/douyuUserService');
 const msgService = require('./util/msgService');
 const checkInService = require('./util/checkInService');
@@ -40,7 +42,7 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
     await browser.close();
 
     // 关闭redis
-    await checkInService.close();
+    await redisClient.disconnect();
 
     // 启用通知服务
     await msgService.sendMessage('斗鱼打卡任务', dumpAllMessage()).then(() => {
