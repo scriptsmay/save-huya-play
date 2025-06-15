@@ -80,6 +80,7 @@ async function sendMessage(title, content, description = '') {
  */
 async function sendPicture(url) {
   try {
+    console.log('发送图片', url);
     const API = 'http://192.168.31.10:3000/send_group_msg';
     const postData = {
       group_id: MESSAGE_PUSHER_QQ_GROUP_ID,
