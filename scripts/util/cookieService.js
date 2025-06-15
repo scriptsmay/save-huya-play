@@ -53,13 +53,15 @@ async function loadCookiesFromRedis(target, key = 'browser_cookies') {
   return true;
 }
 
-// 检查登录状态
-async function checkLoginStatus(
-  page,
-  loginCheckSelector = 'selector_that_indicates_login'
-) {
+/**
+ * 通过 selector 检查登录状态
+ * @param {*} page
+ * @param {*} checkSelector
+ * @returns
+ */
+async function checkLoginStatus(page, checkSelector = '.user_name') {
   try {
-    await page.waitForSelector(loginCheckSelector, { timeout: 5000 });
+    await page.waitForSelector(checkSelector, { timeout: 5000 });
     return true;
   } catch (e) {
     console.log('Not logged in', e.message);
