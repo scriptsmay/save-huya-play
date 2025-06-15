@@ -23,7 +23,11 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
   });
 
   try {
-    await douyuUserService.userLoginCheck(browser);
+    const isLoggedIn = await douyuUserService.userLoginCheck(browser);
+    if (!isLoggedIn) {
+      timeLog('斗鱼用户未登录');
+      return;
+    }
 
     await sleep(5000);
 

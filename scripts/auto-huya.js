@@ -25,7 +25,11 @@ const SELECTORS = config.HUYA_SELECTORS;
   });
 
   try {
-    await huyaUserService.userLoginCheck(browser);
+    const isLoggedIn = await huyaUserService.userLoginCheck(browser);
+    if (!isLoggedIn) {
+      timeLog('虎牙用户未登录');
+      return;
+    }
 
     await goTaskCenter(browser);
 

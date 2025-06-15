@@ -32,9 +32,9 @@ class RedisClient {
 
   async disconnect() {
     try {
-      await this.client.disconnect();
+      await this.client.destroy();
     } catch (err) {
-      console.error('Redis disconnection failed:', err);
+      console.error('Redis destroy failed:', err);
     }
   }
 

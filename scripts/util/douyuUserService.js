@@ -1,15 +1,24 @@
 const { timeLog } = require('./index');
-const fs = require('fs');
+// const fs = require('fs');
 const config = require('../../config/config');
+const cookieService = require('./cookieService');
 
 // 常量定义
 const SELECTORS = config.DOUYU_SELECTORS;
 
 async function userLoginCheck(browser) {
   // 检查是否有保存的cookies
-  if (fs.existsSync('cookies.json')) {
-    const cookies = JSON.parse(fs.readFileSync('cookies.json'));
-    await browser.setCookie(...cookies);
+  // if (fs.existsSync('cookies.json')) {
+  //   const cookies = JSON.parse(fs.readFileSync('cookies.json'));
+  //   await browser.setCookie(...cookies);
+  // }
+  const loadResult = await cookieService.loadCookiesFromRedis(
+    browser,
+    'douyu_cookies'
+  );
+  if (loadResult) {
+    timeLog('已从Redis中加载cookies，未过期');
+    return true;
   }
 
   try {
@@ -43,14 +52,34 @@ async function userLoginCheck(browser) {
         .catch((err) => {
           console.error('等待页面跳转失败:', err.message);
         });
-      timeLog('检测到页面跳转，用户已登录');
 
-      const cookies = await browser.cookies();
-      fs.writeFileSync('cookies.json', JSON.stringify(cookies));
-      timeLog('已保存 cookies 到 cookies.json 文件');
+      return await checkAndSave(page);
+
+      // const cookies = await browser.cookies();
+      // fs.writeFileSync('cookies.json', JSON.stringify(cookies));
+      // timeLog('已保存 cookies 到 cookies.json 文件');
+    } else {
+      timeLog('已登录，正在保存cookies...');
+      await cookieService.saveCookiesToRedis(page, 'douyu_cookies');
+      return true;
     }
   } catch (error) {
     console.error('发生错误:', error);
+  }
+}
+
+async function checkAndSave(page) {
+  const isLoggedIn = await cookieService.checkLoginStatus(
+    page,
+    SELECTORS.USER_NAME_ELEMENT
+  );
+  if (isLoggedIn) {
+    timeLog('已登录，正在保存cookies...');
+    await cookieService.saveCookiesToRedis(page);
+    return true;
+  } else {
+    timeLog('登录失败，请重新扫码登录');
+    return false;
   }
 }
 

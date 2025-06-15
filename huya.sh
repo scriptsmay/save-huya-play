@@ -36,7 +36,7 @@ run_npm save
 sleep 5
 run_npm kpl
 sleep 5
-run_npm checkin
+run_npm huya
 sleep 5
 run_npm huyabadge
 sleep 5

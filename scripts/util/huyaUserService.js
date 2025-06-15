@@ -1,21 +1,31 @@
 // huyaUserService.js
 
 const { timeLog } = require('./index');
-const fs = require('fs');
+// const fs = require('fs');
 const config = require('../../config/config');
+const cookieService = require('./cookieService');
 
 // 常量定义
 const SELECTORS = config.HUYA_SELECTORS;
 
 async function userLoginCheck(browser) {
-  // 检查是否有保存的cookies
-  if (fs.existsSync('cookies.json')) {
-    const cookies = JSON.parse(fs.readFileSync('cookies.json'));
-    await browser.setCookie(...cookies);
+  // // 检查是否有保存的cookies
+  // if (fs.existsSync('cookies.json')) {
+  //   const cookies = JSON.parse(fs.readFileSync('cookies.json'));
+  //   await browser.setCookie(...cookies);
+  // }
+  const loadResult = await cookieService.loadCookiesFromRedis(
+    browser,
+    'huya_cookies'
+  );
+  if (loadResult) {
+    timeLog('已从Redis中加载cookies，未过期');
+    return true;
   }
 
   try {
     const page = await browser.newPage();
+
     // 打开目标页面
     await page.goto(config.URLS.URL_HUYA_USER, {
       waitUntil: 'domcontentloaded',
@@ -24,11 +34,11 @@ async function userLoginCheck(browser) {
 
     const username = await checkLoginStatus(page);
     if (!username) {
-      timeLog('正在等待二维码图片加载...60s');
+      timeLog('正在等待二维码图片加载...10s');
       await page
-        .waitForSelector(SELECTORS.QR_IMAGE_ELEMENT, { timeout: 30000 })
+        .waitForSelector(SELECTORS.QR_IMAGE_ELEMENT, { timeout: 10000 })
         .catch((err) => {
-          console.error('等待二维码元素超时:', err);
+          console.error('等待二维码元素超时:', err.message);
           return;
         });
 
@@ -39,20 +49,34 @@ async function userLoginCheck(browser) {
           return;
         });
       timeLog('二维码图片地址:', qrImgUrl);
-      timeLog('请扫码登录...');
+      timeLog('等待120s，请扫码登录...');
       await page
-        .waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 })
+        .waitForNavigation({ waitUntil: 'networkidle2', timeout: 120000 })
         .catch((err) => {
-          console.error('等待页面跳转失败:', err);
+          console.error('等待页面跳转失败:', err.message);
         });
-      timeLog('检测到页面跳转，用户已登录');
+      // timeLog('检测到页面跳转');
 
-      const cookies = await browser.cookies();
-      fs.writeFileSync('cookies.json', JSON.stringify(cookies));
-      timeLog('已保存 cookies 到 cookies.json 文件');
+      const isLoggedIn = await cookieService.checkLoginStatus(
+        page,
+        SELECTORS.USER_NAME_ELEMENT
+      );
+      if (isLoggedIn) {
+        timeLog('已登录，正在保存cookies...');
+        await cookieService.saveCookiesToRedis(page, 'huya_cookies');
+        return true;
+      } else {
+        timeLog('登录失败，请重新扫码登录');
+        return false;
+      }
+    } else {
+      timeLog('已登录，正在保存cookies...');
+      await cookieService.saveCookiesToRedis(page, 'huya_cookies');
+      return username;
     }
   } catch (error) {
     console.error('发生错误:', error);
+    return false;
   }
 }
 

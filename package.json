@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node app/index.js",
     "save": "node scripts/save-huya-play.js",
-    "checkin": "node scripts/auto-huya.js",
+    "huya": "node scripts/auto-huya.js",
     "kpl": "node scripts/huya-kpl.js",
     "huyabadge": "node scripts/huya-badgelist.js",
     "douyu": "node scripts/douyu-checkin.js"
