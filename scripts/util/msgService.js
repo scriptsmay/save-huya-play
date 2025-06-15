@@ -3,8 +3,14 @@ require('dotenv').config();
 // const path = require('path');
 const axios = require('axios');
 
-const { MESSAGE_PUSHER_SERVER, MESSAGE_PUSHER_USERNAME, MESSAGE_PUSHER_TOKEN } =
-  process.env;
+// 一个小群 881976357
+// 消息发布 1034923436
+const {
+  MESSAGE_PUSHER_SERVER,
+  MESSAGE_PUSHER_USERNAME,
+  MESSAGE_PUSHER_TOKEN,
+  MESSAGE_PUSHER_QQ_GROUP_ID = 1034923436,
+} = process.env;
 
 /**
  * 
@@ -76,7 +82,7 @@ async function sendPicture(url) {
   try {
     const API = 'http://192.168.31.10:3000/send_group_msg';
     const postData = {
-      group_id: 1034923436,
+      group_id: MESSAGE_PUSHER_QQ_GROUP_ID,
       message: [
         {
           type: 'image',
