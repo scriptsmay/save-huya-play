@@ -4,7 +4,7 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
-const { getTimestamp } = require('./util/index');
+const { getTimestamp, timeLog } = require('./util/index');
 const msgService = require('./util/msgService');
 
 // 定义URL和选择器
@@ -23,7 +23,11 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
       args: ['--no-sandbox', '--disable-setuid-sandbox'], // 适用于某些Linux环境
     });
 
-    await huyaUserService.userLoginCheck(browser);
+    const isLoggedIn = await huyaUserService.userLoginCheck(browser);
+    if (!isLoggedIn) {
+      timeLog('虎牙用户未登录');
+      return;
+    }
 
     await mainTask(browser);
 

@@ -19,7 +19,11 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
     args: ['--mute-audio'], // 全局静音
   });
   try {
-    await huyaUserService.userLoginCheck(browser);
+    const isLoggedIn = await huyaUserService.userLoginCheck(browser);
+    if (!isLoggedIn) {
+      timeLog('虎牙用户未登录');
+      return;
+    }
 
     timeLog('开始执行主线程任务...');
     await startKplTask(browser);
