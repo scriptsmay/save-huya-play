@@ -1,6 +1,3 @@
-// 本地环境变量
-require('dotenv').config();
-
 const { timeLog, sleep } = require('./index');
 const config = require('../../config/config');
 const checkInService = require('./checkInService');
@@ -13,7 +10,7 @@ const GIFT_KPL_TEXT = '稳住 能赢';
 
 const GIFT_SUPER_TEXT = '超粉虎粮';
 
-const DEFAULT_PRESENT_NUM = +process.env.HUYA_ROOM_HULIANG_NUM || 10;
+const DEFAULT_PRESENT_NUM = +config.HUYA_ROOM_HULIANG_NUM || 10;
 /**
  * 直播间赠送虎粮，可以指定免费虎粮礼物数量
  * @param {*} page

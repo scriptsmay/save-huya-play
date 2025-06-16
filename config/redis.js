@@ -1,6 +1,6 @@
 // utils/redisClient.js
-const { createClient } = require('redis');
 require('dotenv').config();
+const { createClient } = require('redis');
 
 class RedisClient {
   constructor() {

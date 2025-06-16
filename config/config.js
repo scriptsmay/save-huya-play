@@ -1,3 +1,7 @@
+require('dotenv').config();
+
+const envs = process.env;
+
 // 定义目标 URL
 const URL_HUYA_USER = 'https://i.huya.com/';
 // kpl直播 URL
@@ -70,6 +74,8 @@ const qqMsgTpl = {
 };
 
 const config = {
+  ...envs,
+  siteUrl: 'http://192.168.31.10:3210/',
   huya: [
     {
       name: 'KPL钟意',

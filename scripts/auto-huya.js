@@ -1,5 +1,4 @@
 // 本地环境变量
-require('dotenv').config();
 const puppeteer = require('puppeteer');
 const redisClient = require('../config/redis');
 
@@ -11,7 +10,7 @@ const presentService = require('./util/presentService');
 const msgService = require('./util/msgService');
 
 // 定义目标 URL
-const TARGET_ROOM_LIST = process.env.HUYA_ROOM_LIST.split(',') || [];
+const TARGET_ROOM_LIST = config.HUYA_ROOM_LIST.split(',') || [];
 const totalRoomCount = TARGET_ROOM_LIST.length;
 let roomCount = 0;
 

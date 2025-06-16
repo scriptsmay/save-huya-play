@@ -24,7 +24,7 @@ async function testText() {
     });
 }
 
-// const imgFile = '../logs/screenshot/table-screenshot.20250610_164137.png';
+// const imgFile = '../logs/screenshot/table-screenshot.20250610_164343.png';
 
 // 获取今日日期字符串
 function getTodayDateString() {

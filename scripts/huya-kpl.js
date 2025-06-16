@@ -1,5 +1,4 @@
 // 本地环境变量
-require('dotenv').config();
 const puppeteer = require('puppeteer');
 const { timeLog, sleep } = require('./util/index');
 const config = require('../config/config');

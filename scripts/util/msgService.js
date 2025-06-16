@@ -1,16 +1,14 @@
-require('dotenv').config();
-// const fs = require('fs');
-// const path = require('path');
 const axios = require('axios');
-
-// 一个小群 881976357
-// 消息发布 1034923436
 const {
+  siteUrl,
   MESSAGE_PUSHER_SERVER,
   MESSAGE_PUSHER_USERNAME,
   MESSAGE_PUSHER_TOKEN,
   MESSAGE_PUSHER_QQ_GROUP_ID = 1034923436,
-} = process.env;
+} = require('../../config/config');
+
+// 一个小群 881976357
+// 消息发布 1034923436
 
 /**
  * 
@@ -45,7 +43,7 @@ async function sendMessage(title, content, description = '') {
     const postData = JSON.stringify({
       title: title,
       desp: description,
-      content: content + '\n来自：http://192.168.31.10:3210/',
+      content: content + `\n来自：${siteUrl}`,
       token: MESSAGE_PUSHER_TOKEN,
       // 通道名称 ，不填默认是 飞书-webhook
       // channel: '飞书-测试应用',
@@ -96,7 +94,7 @@ async function sendPicture(url) {
         },
         {
           type: 'text',
-          data: { text: '来自：http://192.168.31.10:3210/' },
+          data: { text: `来自：${siteUrl}` },
         },
       ],
     };

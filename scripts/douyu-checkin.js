@@ -1,4 +1,3 @@
-require('dotenv').config();
 const puppeteer = require('puppeteer');
 const {
   timeLog,
@@ -56,7 +55,7 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
  * @param {*} browser
  */
 async function goTaskCenter(browser) {
-  if (process.env.DOUYU_NOCHECKIN == '1') {
+  if (config.DOUYU_NOCHECKIN == '1') {
     // 跳过签到
     return false;
   }
