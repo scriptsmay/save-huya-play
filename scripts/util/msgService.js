@@ -1,3 +1,5 @@
+require('module-alias/register');
+
 const axios = require('axios');
 const {
   siteUrl,
@@ -5,7 +7,10 @@ const {
   MESSAGE_PUSHER_USERNAME,
   MESSAGE_PUSHER_TOKEN,
   MESSAGE_PUSHER_QQ_GROUP_ID = 1034923436,
-} = require('../../config/config');
+} = require('@config');
+
+// const fs = require('fs');
+const larkClient = require('@/config/lark');
 
 // 一个小群 881976357
 // 消息发布 1034923436
@@ -73,20 +78,33 @@ async function sendMessage(title, content, description = '') {
 
 /**
  * 发送图片消息，目前好像只有QQ支持
+ * 1. 加入飞书推送
  * @param {*} url
  * @returns
  */
-async function sendPicture(url) {
+async function sendPicture({ filePath = '', url = '' }) {
+  // console.log(url)
+  if (filePath) {
+    const result = await larkClient.sendImage(filePath);
+    console.log('图片消息发送结果:', result);
+  }
+
+  await sendQQPic({ url, filePath });
+}
+
+async function sendQQPic({ filePath = '', url = '' }) {
+  const QQ_API = 'http://192.168.31.10:3000/send_group_msg';
+  if (!url) {
+    console.log('发送图片失败，缺少参数 url', url, filePath);
+    return false;
+  }
   try {
-    console.log('发送图片', url);
-    const API = 'http://192.168.31.10:3000/send_group_msg';
     const postData = {
       group_id: parseInt(MESSAGE_PUSHER_QQ_GROUP_ID),
       message: [
         {
           type: 'image',
           data: {
-            url,
             // file: imgBase64.dataURI, // 图片文件本地路径
             // "url": "https://xxx",   // 图片URL
             // "md5": "3F7D797BE1AF0A" // 图片md5 (大写)
@@ -98,8 +116,16 @@ async function sendPicture(url) {
         },
       ],
     };
+    if (url) {
+      postData.message[0].data.url = url;
+    }
+    // 还是不行，只能用url了
+    // if (filePath) {
+    //   postData.message[0].data.file = fs.createReadStream(filePath);
+    // }
 
-    const response = await axios.post(API, postData);
+    const response = await axios.post(QQ_API, postData);
+    console.log('QQ图片消息发送结果:', response.data);
     if (response.data.success) {
       return response.data;
     }

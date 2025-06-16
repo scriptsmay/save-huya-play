@@ -191,7 +191,7 @@ async function goScreenShot(page) {
   console.log(`截图已保存为: ${OUTPUT_FILE}`);
   const url = `http://192.168.31.10:3210/screenshot/${TARGET_FILENAME}`;
   await msgService
-    .sendPicture(url)
+    .sendPicture({ url })
     .then((res) => {
       console.log('成功', res);
     })

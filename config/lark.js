@@ -155,7 +155,7 @@ async function updateFile(filePath) {
       data: {
         file_type: fileType,
         file_name: fileName,
-        file: fs.readFileSync(filePath),
+        file: fs.createReadStream(filePath),
       },
     })
     .then((res) => {

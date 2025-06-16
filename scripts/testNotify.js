@@ -1,3 +1,4 @@
+require('module-alias/register');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -40,7 +41,7 @@ function getTodayDateString() {
 async function findTodayScreenshots() {
   const today = getTodayDateString();
   const screenshotDir = path.join(__dirname, '../logs/screenshot');
-  const prefix = `table-screenshot.${today}`;
+  const regexStr = `${today}`;
 
   try {
     // 检查目录是否存在
@@ -52,7 +53,8 @@ async function findTodayScreenshots() {
     // 筛选出今日的截图文件
     const todayScreenshots = files.filter((file) => {
       return (
-        file.startsWith(prefix) && /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file)
+        file.indexOf(regexStr) > -1 &&
+        /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file)
       ); // 更全面的图片扩展名
     });
 
@@ -82,13 +84,17 @@ async function findTodayScreenshots() {
   }
 }
 
+function getFilePath(filename) {
+  return path.join(__dirname, '../logs/screenshot/', filename);
+}
+
 async function testPic(filename) {
   // 找到 table-screenshot.20250610_ 以今日日期的图片
-  console.log(filename);
-  const url = `http://192.168.31.10:3210/screenshot/${filename}`;
+  // console.log(filename);
+  // const url = `http://192.168.31.10:3210/screenshot/${filename}`;
 
   await msgService
-    .sendPicture(url)
+    .sendPicture({ filePath: getFilePath(filename) })
     .then((res) => {
       console.log('成功', res);
     })
