@@ -54,11 +54,13 @@ const SELECTORS = config.HUYA_SELECTORS;
         newPage = await browser.newPage();
       }
       await autoCheckInRoom(newPage, roomId);
+      await sleep(30000);
     }
     await newPage.close();
 
     // 虎牙PC任务中心
     await pcTaskCenter(browser);
+    await sleep(30000);
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -261,4 +263,6 @@ async function roomCheckIn(page, roomId) {
     // timeLog(result);
     roomCount += 1;
   }
+
+  await sleep(15000);
 }
