@@ -6,7 +6,7 @@ const config = require('../config/config');
 const redisClient = require('../config/redis');
 
 const huyaUserService = require('./util/huyaUserService');
-const { getTimestamp, timeLog } = require('./util/index');
+const { getTimestamp, timeLog, getScreenShotPath } = require('./util/index');
 const msgService = require('./util/msgService');
 
 // 定义URL和选择器
@@ -85,10 +85,7 @@ async function mainTask(browser) {
   const url = `http://192.168.31.10:3210/screenshot/${TARGET_FILENAME}`;
 
   await msgService
-    .sendPicture({ url })
-    .then((res) => {
-      console.log('成功', res);
-    })
+    .sendPicture({ url, filePath: getScreenShotPath(TARGET_FILENAME) })
     .catch((err) => {
       console.log(err.message);
     });

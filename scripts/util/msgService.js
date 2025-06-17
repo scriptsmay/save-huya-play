@@ -9,6 +9,8 @@ const {
   MESSAGE_PUSHER_QQ_GROUP_ID = 1034923436,
 } = require('@config');
 
+const { isInAllowedTime } = require('./index');
+
 // const fs = require('fs');
 const larkClient = require('@/config/lark');
 
@@ -84,11 +86,12 @@ async function sendMessage(title, content, description = '') {
  */
 async function sendPicture({ filePath = '', url = '' }) {
   // console.log(url)
-  if (filePath) {
+  if (filePath && isInAllowedTime()) {
     const result = await larkClient.sendImage(filePath);
-    console.log('图片消息发送结果:', result);
+    console.log('Lark图片消息发送结果:', result);
   }
 
+  // QQ设置了免打扰
   await sendQQPic({ url, filePath });
 }
 

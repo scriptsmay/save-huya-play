@@ -1,3 +1,40 @@
+const path = require('path');
+
+// 可以提取为配置参数
+const ALLOWED_HOURS = {
+  start: 9, // 9:00
+  end: 21, // 21:00
+};
+
+// 允许周末发送
+const ALLOW_WEEKEND = true;
+
+/**
+ * 判断消息免打扰状态
+ * @returns {Boolean}
+ */
+function isInAllowedTime() {
+  const now = new Date();
+  const hours = now.getHours();
+  if (hours < ALLOWED_HOURS.start || hours >= ALLOWED_HOURS.end) {
+    console.log(
+      `当前时间 ${now.toLocaleTimeString()} 不在允许发送时段 (${
+        ALLOWED_HOURS.start
+      }:00-${ALLOWED_HOURS.end}:00)`
+    );
+    return false;
+  }
+  // 只允许工作日发送
+  const day = now.getDay(); // 0是周日，1-6是周一到周六
+  if (day === 0 || day === 6) {
+    if (!ALLOW_WEEKEND) {
+      console.log('今天是周末，不允许周末发送');
+      return false;
+    }
+  }
+  return hours >= ALLOWED_HOURS.start && hours < ALLOWED_HOURS.end;
+}
+
 let globalMsgContent = '';
 
 /**
@@ -47,9 +84,16 @@ function getTimestamp() {
   return timestamp;
 }
 
+function getScreenShotPath(filename) {
+  console.log('__dirname', __dirname);
+  return path.join(__dirname, '../../logs/screenshot/', filename);
+}
+
 module.exports = {
   timeLog,
   sleep,
   getTimestamp,
   dumpAllMessage,
+  getScreenShotPath,
+  isInAllowedTime,
 };
