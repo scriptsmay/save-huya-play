@@ -89,6 +89,26 @@ function getScreenShotPath(filename) {
   return path.join(__dirname, '../../logs/screenshot/', filename);
 }
 
+// 使用示例
+// const claimButtons = await getElementsByText(page, '.task-panel-wrap *', '领取');
+// 查找元素的替代方案（兼容旧版）
+const getElementsByText = async (page, selector, text) => {
+  const elements = await page.$$(selector);
+  const filtered = [];
+
+  for (const element of elements) {
+    const elementText = await page.evaluate(
+      (el) => el.textContent.trim(),
+      element
+    );
+    if (elementText === text) {
+      filtered.push(element);
+    }
+  }
+
+  return filtered;
+};
+
 module.exports = {
   timeLog,
   sleep,
@@ -96,4 +116,5 @@ module.exports = {
   dumpAllMessage,
   getScreenShotPath,
   isInAllowedTime,
+  getElementsByText,
 };

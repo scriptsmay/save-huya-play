@@ -14,6 +14,8 @@ const URL_HUYA_TASK_KPL =
 const URL_HUYA_BADGELIST =
   'https://i.huya.com/index.php?m=HomeIndex#/fansBadgeList';
 
+const URL_HUYA_H5_CHECKIN = 'https://hd.huya.com/h5/task_center/index.html';
+
 // 虎牙任务中心
 const URL_HUYA_TASK_CENTER =
   'https://hd.huya.com/web/icenter-userlevel/index.html';
@@ -98,6 +100,7 @@ const config = {
     URL_HUYA_TASK_KPL,
     URL_HUYA_BADGELIST,
     URL_HUYA_TASK_CENTER,
+    URL_HUYA_H5_CHECKIN,
     URL_DOUYU_POINT_PAGE,
     URL_DOUYU_USER,
   },

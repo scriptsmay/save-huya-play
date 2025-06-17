@@ -143,6 +143,7 @@ async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
     const realCount = await giftIcon.evaluate(
       (btn) => btn.querySelector('.c-count')?.textContent.trim() || '0'
     );
+    timeLog(`查询到 '虎粮' 数量 ${realCount} 个`);
 
     const giftCount = Math.min(parseInt(realCount, 10), presentNum);
     availableGifts = await sendGiftAndRefresh(

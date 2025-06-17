@@ -2,7 +2,12 @@
 const puppeteer = require('puppeteer');
 const redisClient = require('../config/redis');
 
-const { timeLog, sleep, dumpAllMessage } = require('./util/index');
+const {
+  timeLog,
+  sleep,
+  dumpAllMessage,
+  getElementsByText,
+} = require('./util/index');
 const checkInService = require('./util/checkInService');
 const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
@@ -32,7 +37,7 @@ const SELECTORS = config.HUYA_SELECTORS;
       return;
     }
 
-    await goTaskCenter(browser);
+    await goH5CheckIn(browser);
 
     if (!totalRoomCount) {
       console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
@@ -50,8 +55,10 @@ const SELECTORS = config.HUYA_SELECTORS;
       }
       await autoCheckInRoom(newPage, roomId);
     }
-
     await newPage.close();
+
+    // 虎牙PC任务中心
+    await pcTaskCenter(browser);
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -70,16 +77,16 @@ const SELECTORS = config.HUYA_SELECTORS;
 })();
 
 /**
- * 每日任务中心签到任务
+ * 每日任务中心签到
  * @param {*} browser
  */
-async function goTaskCenter(browser) {
+async function goH5CheckIn(browser) {
   if (process.env.HUYA_NOCHECKIN == '1') {
     // 跳过签到
     return false;
   }
   const page = await browser.newPage();
-  const URL_TASK = 'https://hd.huya.com/h5/task_center/index.html';
+  const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
   try {
     await page.goto(URL_TASK, {
       waitUntil: 'domcontentloaded',
@@ -98,6 +105,54 @@ async function goTaskCenter(browser) {
     timeLog('任务中心签到完成');
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
+  }
+  await page.close();
+}
+
+/**
+ * pc任务中心白嫖积分
+ * @param {*} browser
+ */
+async function pcTaskCenter(browser) {
+  const page = await browser.newPage();
+  try {
+    await page.goto(config.URLS.URL_HUYA_TASK_CENTER, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
+    const point = await page.$eval(
+      config.HUYA_SELECTORS.HUYA_POINTS,
+      (el) => el.textContent
+    );
+    timeLog(`当前积分：${point}`);
+
+    // 等待任务面板加载
+    await page.waitForSelector('.task-panel-wrap');
+    timeLog('任务面板已加载');
+    await sleep(1000); // 等待1秒防止过快点击
+
+    while (true) {
+      let claimButtons = await getElementsByText(
+        page,
+        '.task-panel-wrap div',
+        '领取'
+      );
+      timeLog(`找到${claimButtons.length}个"领取"按钮`);
+      if (claimButtons.length === 0) {
+        break;
+      }
+      await claimButtons[0].click();
+      await sleep(3000); // 添加一个延迟，防止过快点击
+    }
+
+    await page.close();
+
+    timeLog('PC任务中心自动任务完成');
+  } catch (error) {
+    console.error(
+      `打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
+      error.message
+    );
   }
   await page.close();
 }
