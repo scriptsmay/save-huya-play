@@ -1,19 +1,6 @@
 // util/checkInService.js
 const redisClient = require('../../config/redis');
-
-// 计算今天24点的剩余秒数
-function getSecondsUntilMidnight() {
-  const now = new Date();
-  const todayEnd = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1, // 明天
-    0,
-    0,
-    0 // 0时0分0秒
-  );
-  return Math.floor((todayEnd - now) / 1000);
-}
+const { getSecondsUntilMidnight } = require('./index');
 
 class CheckInService {
   async setCheckIn(userId, platform = 'huya') {

@@ -72,6 +72,12 @@ const browserOptions = {
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
 
+    // 剩余礼物数
+    const giftNum = await redisClient.get('huya:giftNum');
+    if (giftNum) {
+      timeLog(`剩余免费礼物数：${giftNum}`);
+    }
+
     // 关闭redis
     await redisClient.disconnect();
 
@@ -127,9 +133,19 @@ async function autoCheckInRoom(page, roomId) {
   const URL_ROOM = `https://www.huya.com/${roomId}`;
 
   try {
+    // 检查是否已打卡
+    const statusCheck = await checkInService.hasCheckedIn(roomId);
+    const statusGift = await checkInService.hasGift(roomId);
+    if (statusCheck.checked && statusGift.checked) {
+      roomCount += 1;
+      timeLog(
+        `房间 ${roomId} 已打卡已送礼，直接跳过...[${roomCount}/${totalRoomCount}]`
+      );
+      await sleep(5000);
+      return;
+    }
     // 1. 导航到房间页
     timeLog(`开始处理房间 ${roomId}`);
-
     await page
       .goto(URL_ROOM, {
         waitUntil: 'domcontentloaded',
@@ -147,8 +163,13 @@ async function autoCheckInRoom(page, roomId) {
     const title = await page.title();
     timeLog(`页面标题： ${title}`);
 
-    await roomCheckIn(page, roomId);
-    await sleep(10000);
+    // 等待15s
+    await sleep(15000);
+
+    if (!statusCheck.checked) {
+      await roomCheckIn(page, roomId);
+    }
+
     await presentService.room(page, roomId);
 
     return true;
@@ -164,18 +185,6 @@ async function autoCheckInRoom(page, roomId) {
  * @param {*} page
  */
 async function roomCheckIn(page, roomId) {
-  // 检查是否已打卡
-  const status = await checkInService.hasCheckedIn(roomId);
-  // console.log(status);
-  if (status.checked) {
-    roomCount += 1;
-    timeLog(
-      `Redis 读取到房间 ${roomId}：已打卡，跳过打卡...[${roomCount}/${totalRoomCount}]`
-    );
-    await sleep(3000);
-    return;
-  }
-
   // 2. 等待徽章元素
   const badgeSelector = SELECTORS.BADGE_SELECTOR;
   await page.waitForSelector(badgeSelector, { timeout: 10000 });

@@ -1,5 +1,6 @@
-const { timeLog, sleep } = require('./index');
+const { timeLog, sleep, getSecondsUntilMidnight } = require('./index');
 const config = require('../../config/config');
+const redisClient = require('../../config/redis');
 const checkInService = require('./checkInService');
 
 // 常量定义
@@ -153,6 +154,14 @@ async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
       GIFT_FREE_TEXT,
       giftCount
     );
+
+    const leftCount = realCount - giftCount;
+
+    // 把虎粮数量存起来
+    // 存储打卡ID，设置过期时间
+    await redisClient.set(`huya:giftNum`, leftCount, {
+      EX: getSecondsUntilMidnight(),
+    });
   }
 }
 
@@ -162,16 +171,21 @@ async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
  * @returns
  */
 async function getTheIframe(page, roomId) {
-  const iconBag = SELECTORS.ICON_BAG;
-  await page.waitForSelector(iconBag, { timeout: 10000 }).catch((err) => {
-    console.warn(`房间 ${roomId}：未找到包裹图标`, err.message);
-  });
-  timeLog(`房间 ${roomId}：点击包裹图标`);
-  await page.click(SELECTORS.ICON_BAG);
-  await sleep(2000);
-  // await page.waitForNetworkIdle({ timeout: 5000 }).catch((err) => {
-  //   console.warn(`房间 ${roomId}：等待网络空闲超时`, err.message);
-  // });
+  // const iconBag = SELECTORS.ICON_BAG;
+  await page
+    .locator(SELECTORS.ICON_BAG, { timeout: 10000 })
+    .click()
+    .catch((err) => {
+      console.warn(`房间 ${roomId}：未找到包裹图标`, err.message);
+    });
+  // await page
+  //   .waitForSelector(SELECTORS.ICON_BAG, { timeout: 10000 })
+  //   .catch((err) => {
+  //     console.warn(`房间 ${roomId}：未找到包裹图标`, err.message);
+  //   });
+  // timeLog(`房间 ${roomId}：点击包裹图标`);
+  // await page.click(SELECTORS.ICON_BAG);
+  await sleep(10000);
   let frame = findFrame(page.mainFrame(), GIFT_URL_STR);
   if (!frame) {
     await page.click(SELECTORS.ICON_BAG);
@@ -238,8 +252,17 @@ function dumpFrameTree(frame, indent) {
   for (let child of frame.childFrames()) dumpFrameTree(child, indent + '  ');
 }
 
+/**
+ * 从redis中获取虎粮数量
+ * @returns {number}
+ */
+async function getLeftGiftNum() {
+  return await redisClient.get('huya:giftNum');
+}
+
 module.exports = {
   room: roomPresents,
   debugIframe,
   dumpFrameTree,
+  getLeftGiftNum,
 };

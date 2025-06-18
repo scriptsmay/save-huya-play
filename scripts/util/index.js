@@ -44,11 +44,11 @@ let globalMsgContent = '';
 function timeLog(...args) {
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
-  const timeStr = `[${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+  const timeStr = `[${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(
     now.getDate()
   )} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}]`;
 
-  globalMsgContent += `${timeStr} ${args.join(' ')}\n`;
+  globalMsgContent += `${timeStr}${args.join(' ')}\n`;
 
   console.log(timeStr, ...args);
 }
@@ -84,6 +84,20 @@ function getTimestamp() {
   return timestamp;
 }
 
+// 计算今天24点的剩余秒数
+function getSecondsUntilMidnight() {
+  const now = new Date();
+  const todayEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1, // 明天
+    0,
+    0,
+    0 // 0时0分0秒
+  );
+  return Math.floor((todayEnd - now) / 1000);
+}
+
 function getScreenShotPath(filename) {
   console.log('__dirname', __dirname);
   return path.join(__dirname, '../../logs/screenshot/', filename);
@@ -117,4 +131,5 @@ module.exports = {
   getScreenShotPath,
   isInAllowedTime,
   getElementsByText,
+  getSecondsUntilMidnight,
 };
