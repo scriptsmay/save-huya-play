@@ -6,6 +6,7 @@
     "start": "node app/index.js",
     "save": "node scripts/save-huya-play.js",
     "huya": "node scripts/auto-huya.js",
+    "huya-checkin": "node scripts/huya-checkin.js",
     "kpl": "node scripts/huya-kpl.js",
     "huyabadge": "node scripts/huya-badgelist.js",
     "douyu": "node scripts/douyu-checkin.js"
@@ -37,6 +38,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.16.0",
     "puppeteer": "^24.9.0",
+    "puppeteer-cluster": "^0.24.0",
     "redis": "^5.5.5"
   },
   "devDependencies": {

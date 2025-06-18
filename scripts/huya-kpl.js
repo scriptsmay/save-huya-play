@@ -16,6 +16,7 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
     userDataDir: './user_data', // 指定用户数据目录
     headless: false, // 可视化模式更容易调试
     args: ['--mute-audio'], // 全局静音
+    protocolTimeout: config.protocolTimeout,
   });
   try {
     const isLoggedIn = await huyaUserService.userLoginCheck(browser);

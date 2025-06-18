@@ -22,6 +22,7 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
     userDataDir: './user_data', // 指定用户数据目录
     headless: 'new', // 使用新的Headless模式
     args: ['--no-sandbox', '--disable-setuid-sandbox'], // 适用于某些Linux环境
+    // protocolTimeout: config.protocolTimeout,
   });
   try {
     const isLoggedIn = await huyaUserService.userLoginCheck(browser);

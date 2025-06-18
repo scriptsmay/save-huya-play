@@ -2,12 +2,7 @@
 const puppeteer = require('puppeteer');
 const redisClient = require('../config/redis');
 
-const {
-  timeLog,
-  sleep,
-  dumpAllMessage,
-  getElementsByText,
-} = require('./util/index');
+const { timeLog, sleep, dumpAllMessage } = require('./util/index');
 const checkInService = require('./util/checkInService');
 const config = require('../config/config');
 const huyaUserService = require('./util/huyaUserService');
@@ -21,14 +16,16 @@ let roomCount = 0;
 
 // 常量定义
 const SELECTORS = config.HUYA_SELECTORS;
+const browserOptions = {
+  userDataDir: './user_data', // 指定用户数据目录
+  headless: false, // 可视化模式更容易调试
+  args: ['--mute-audio'], // 全局静音
+  protocolTimeout: config.protocolTimeout,
+};
 
 (async () => {
   // 启动浏览器
-  const browser = await puppeteer.launch({
-    userDataDir: './user_data', // 指定用户数据目录
-    headless: false, // 可视化模式更容易调试
-    args: ['--mute-audio'], // 全局静音
-  });
+  const browser = await puppeteer.launch(browserOptions);
 
   try {
     const isLoggedIn = await huyaUserService.userLoginCheck(browser);
@@ -44,6 +41,7 @@ const SELECTORS = config.HUYA_SELECTORS;
       return;
     }
     timeLog(`共需要打卡的虎牙直播间：${totalRoomCount}个`);
+    let needReboot = false;
     let newPage = await browser.newPage();
     for (const roomId of TARGET_ROOM_LIST) {
       if (roomCount == 5) {
@@ -53,14 +51,20 @@ const SELECTORS = config.HUYA_SELECTORS;
         await sleep(60000);
         newPage = await browser.newPage();
       }
-      await autoCheckInRoom(newPage, roomId);
-      await sleep(30000);
+      const result = await autoCheckInRoom(newPage, roomId);
+      if (result) {
+        await sleep(30000);
+      } else {
+        needReboot = true;
+        break;
+      }
     }
     await newPage.close();
-
-    // 虎牙PC任务中心
-    await pcTaskCenter(browser);
-    await sleep(30000);
+    if (needReboot) {
+      // 浏览器重启
+      // await browser.close();
+      timeLog('浏览器出现未响应错误，跳过后续执行.');
+    }
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -72,9 +76,11 @@ const SELECTORS = config.HUYA_SELECTORS;
     await redisClient.disconnect();
 
     // 启用通知服务
-    await msgService.sendMessage('虎牙打卡任务', dumpAllMessage()).then(() => {
-      console.log('消息推送成功');
-    });
+    await msgService
+      .sendMessage('虎牙直播间打卡任务', dumpAllMessage())
+      .then(() => {
+        console.log('消息推送成功');
+      });
   }
 })();
 
@@ -112,60 +118,12 @@ async function goH5CheckIn(browser) {
 }
 
 /**
- * pc任务中心白嫖积分
- * @param {*} browser
- */
-async function pcTaskCenter(browser) {
-  const page = await browser.newPage();
-  try {
-    await page.goto(config.URLS.URL_HUYA_TASK_CENTER, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    });
-    const point = await page.$eval(
-      config.HUYA_SELECTORS.HUYA_POINTS,
-      (el) => el.textContent
-    );
-    timeLog(`当前积分：${point}`);
-
-    // 等待任务面板加载
-    await page.waitForSelector('.task-panel-wrap');
-    timeLog('任务面板已加载');
-    await sleep(1000); // 等待1秒防止过快点击
-
-    while (true) {
-      let claimButtons = await getElementsByText(
-        page,
-        '.task-panel-wrap div',
-        '领取'
-      );
-      timeLog(`找到${claimButtons.length}个"领取"按钮`);
-      if (claimButtons.length === 0) {
-        break;
-      }
-      await claimButtons[0].click();
-      await sleep(3000); // 添加一个延迟，防止过快点击
-    }
-
-    await page.close();
-
-    timeLog('PC任务中心自动任务完成');
-  } catch (error) {
-    console.error(
-      `打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
-      error.message
-    );
-  }
-  await page.close();
-}
-
-/**
  * 执行直播间任务
  * @param {*} page
  * @param {*} roomId
  */
 async function autoCheckInRoom(page, roomId) {
-  if (!roomId) return;
+  if (!roomId) return false;
   const URL_ROOM = `https://www.huya.com/${roomId}`;
 
   try {
@@ -190,9 +148,14 @@ async function autoCheckInRoom(page, roomId) {
     timeLog(`页面标题： ${title}`);
 
     await roomCheckIn(page, roomId);
+    await sleep(10000);
     await presentService.room(page, roomId);
+
+    return true;
   } catch (error) {
     console.error(`房间 ${roomId} 自动打卡过程中发生错误:`, error);
+
+    return false;
   }
 }
 

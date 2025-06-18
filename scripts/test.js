@@ -10,6 +10,21 @@ const { sleep, getElementsByText } = require('./util/index');
   });
   const page = await browser.newPage();
 
+  // // Type into search box using accessible input name.
+  // await page.locator('aria/Search').fill('automate beyond recorder');
+
+  // // Wait and click on first result.
+  // await page.locator('.devsite-result-item-link').click();
+
+  // // Locate the full title with a unique string.
+  // const textSelector = await page
+  //   .locator('text/Customize and automate')
+  //   .waitHandle();
+  // const fullTitle = await textSelector?.evaluate((el) => el.textContent);
+
+  // // Print the full title.
+  // console.log('The title of this blog post is "%s".', fullTitle);
+
   // 导航到目标页面
   await page.goto('https://hd.huya.com/web/icenter-userlevel/index.html');
 

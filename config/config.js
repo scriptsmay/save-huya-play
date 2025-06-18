@@ -77,6 +77,8 @@ const qqMsgTpl = {
 
 const config = {
   ...envs,
+  // 默认超时时间 120s
+  protocolTimeout: 120000,
   siteUrl: 'http://192.168.31.10:3210/',
   huya: [
     {

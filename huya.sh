@@ -38,6 +38,8 @@ run_npm kpl
 sleep 5
 run_npm huya
 sleep 5
+run_npm huya-checkin
+sleep 5
 run_npm huyabadge
 sleep 5
 run_npm douyu
