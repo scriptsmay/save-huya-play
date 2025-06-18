@@ -49,7 +49,6 @@ async function loadCookiesFromRedis(target, key = 'browser_cookies') {
 
   // 设置有效的 Cookie
   await target.setCookie(...validCookies);
-  console.log('Cookies loaded from Redis');
   return true;
 }
 

@@ -52,7 +52,7 @@ class RedisClient {
     });
 
     this.client.on('ready', () => {
-      console.log('Redis ready to use');
+      // console.log('Redis ready to use');
       this._isConnected = true;
     });
 

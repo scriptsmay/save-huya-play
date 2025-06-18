@@ -63,12 +63,6 @@ async function pcTaskCenter(browser) {
     timeLog('任务面板已加载');
     await sleep(1000); // 等待1秒防止过快点击
 
-    const point = await page.$eval(
-      config.HUYA_SELECTORS.HUYA_POINTS,
-      (el) => el.textContent
-    );
-    timeLog(`当前积分：${point}`);
-
     while (true) {
       let claimButtons = await getElementsByText(
         page,
@@ -83,6 +77,15 @@ async function pcTaskCenter(browser) {
       await claimButtons[0].click();
       await sleep(5000); // 添加一个延迟，防止过快点击
     }
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await sleep(10000);
+
+    const point = await page.$eval(
+      config.HUYA_SELECTORS.HUYA_POINTS,
+      (el) => el.textContent
+    );
+    timeLog(`当前积分：${point}`);
   } catch (error) {
     console.error(
       `打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
