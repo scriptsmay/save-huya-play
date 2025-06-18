@@ -14,12 +14,14 @@ const GIFT_SUPER_TEXT = '超粉虎粮';
 const DEFAULT_PRESENT_NUM = +config.HUYA_ROOM_HULIANG_NUM || 10;
 /**
  * 直播间赠送虎粮，可以指定免费虎粮礼物数量
- * @param {*} page
+ * @param {*} page 必填
+ * @param {*} roomId 必填
+ * @param {*} presentNum 可选，默认为10，填了之后不会判断有没有送过礼物，会强制赠送
  */
-async function roomPresents(page, roomId, presentNum = DEFAULT_PRESENT_NUM) {
-  // 检查是否已送礼
+async function roomPresents(page, roomId, presentNum) {
+  // 检查是否已送礼， 如果指定 presentNum ，则不判断
   const status = await checkInService.hasGift(roomId);
-  if (status.checked) {
+  if (status.checked && !presentNum) {
     timeLog(`Redis 读取到房间 ${roomId}：已赠送虎粮，跳过赠送`);
     await sleep(3000);
     return;
@@ -39,7 +41,8 @@ async function roomPresents(page, roomId, presentNum = DEFAULT_PRESENT_NUM) {
       .catch((err) => {
         console.warn(`房间 ${roomId}：未找到礼物box`, err);
       });
-    await sendRoomGift(roomId, frame, presentNum);
+    const freeNum = presentNum || DEFAULT_PRESENT_NUM;
+    await sendRoomGift(roomId, frame, freeNum);
   } catch (error) {
     console.error(`房间 ${roomId}：获取礼物信息失败：`, error);
   }
@@ -119,7 +122,7 @@ async function submitGift(roomId, page, count) {
  * @param {*} roomId
  * @param {*} frame
  */
-async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
+async function sendRoomGift(roomId, frame, presentNum) {
   let availableGifts = await getAvailableGifts(frame);
   // console.log(`礼物查询结果:`, availableGifts);
 
@@ -144,7 +147,7 @@ async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
     const realCount = await giftIcon.evaluate(
       (btn) => btn.querySelector('.c-count')?.textContent.trim() || '0'
     );
-    timeLog(`查询到 '虎粮' 数量 ${realCount} 个`);
+    timeLog(`查询到'${GIFT_FREE_TEXT}'数量 ${realCount} 个`);
 
     const giftCount = Math.min(parseInt(realCount, 10), presentNum);
     availableGifts = await sendGiftAndRefresh(
@@ -157,8 +160,7 @@ async function sendRoomGift(roomId, frame, presentNum = DEFAULT_PRESENT_NUM) {
 
     const leftCount = realCount - giftCount;
 
-    // 把虎粮数量存起来
-    // 存储打卡ID，设置过期时间
+    // 把虎粮数量存起来，基本都是12点过期
     await redisClient.set(`huya:giftNum`, leftCount, {
       EX: getSecondsUntilMidnight(),
     });
