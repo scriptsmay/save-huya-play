@@ -15,16 +15,24 @@ logfile="logs/huya-records.$(date +'%Y%m%d').log"
 
 # 添加带时间戳的日志函数
 log() {
-  echo "[$(date +'%Y-%m-%d %T')] $*"
+  local timestamp="[$(date +'%Y-%m-%d %T')]"
+  echo "$timestamp $*"
+  echo "$timestamp $*" >>"$logfile"
 }
 
 # 封装 npm run 执行逻辑
 run_npm() {
   local script_name="$1"
+  local timeout_duration="30m" # 设置超时时间为30分钟
+
   log "开始执行: npm run $script_name"
-  npm run "$script_name" >>"$logfile" 2>&1
+  timeout --kill-after="$timeout_duration" "$timeout_duration" npm run "$script_name" >>"$logfile" 2>&1
+  # npm run "$script_name" >>"$logfile" 2>&1
   local exit_code=$?
-  if [ $exit_code -ne 0 ]; then
+
+  if [ $exit_code -eq 124 ]; then
+    log "错误: npm run $script_name 超时，已终止"
+  elif [ $exit_code -ne 0 ]; then
     log "错误: npm run $script_name 失败，退出码: $exit_code"
   else
     log "完成: npm run $script_name"

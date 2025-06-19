@@ -39,7 +39,7 @@ async function roomPresents(page, roomId, presentNum) {
     await frame
       .waitForSelector('.g-package-list', { timeout: 30000 })
       .catch((err) => {
-        console.warn(`房间 ${roomId}：未找到礼物box`, err);
+        console.warn(`房间 ${roomId}：未找到礼物box`, err.message);
       });
     const freeNum = presentNum || DEFAULT_PRESENT_NUM;
     await sendRoomGift(roomId, frame, freeNum);
@@ -48,7 +48,7 @@ async function roomPresents(page, roomId, presentNum) {
     await frame.locator('[title="关闭"]').click();
     await sleep(3000);
   } catch (error) {
-    console.error(`房间 ${roomId} 礼物赠送失败：`, error);
+    console.error(`房间 ${roomId} 礼物赠送失败：`, error.message);
   }
 }
 
@@ -101,6 +101,7 @@ async function submitGift(roomId, page, count) {
   // 选择input框输入赠送数量
   await page.click(SELECTORS.PRESENT_INPUT);
   await page.type(SELECTORS.PRESENT_INPUT, count.toString());
+  await sleep(1000);
 
   await page
     .waitForSelector(SELECTORS.PRESENT_SUBMIT, { timeout: 10000 })
@@ -115,7 +116,7 @@ async function submitGift(roomId, page, count) {
       await checkInService.setGift(roomId);
     })
     .catch((err) => {
-      console.warn(`房间 ${roomId}：等待赠送按钮 超时`, err.message);
+      console.warn(`房间 ${roomId}：等待赠送按钮超时`, err.message);
     });
   // 等待n秒模拟空闲
   await sleep(10000);
