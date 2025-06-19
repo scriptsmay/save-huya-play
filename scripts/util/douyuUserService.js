@@ -18,7 +18,7 @@ async function userLoginCheck(browser) {
   );
   if (loadResult) {
     timeLog('已从Redis中加载cookies，未过期');
-    return true;
+    // return true;
   }
 
   try {
