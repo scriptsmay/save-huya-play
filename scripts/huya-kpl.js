@@ -113,7 +113,7 @@ async function openPage(browser, url) {
     // 打开目标页面
     await page.goto(url, {
       waitUntil: 'domcontentloaded',
-      timeout: 15000,
+      timeout: 30000,
     });
 
     return page;

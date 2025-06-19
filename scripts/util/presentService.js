@@ -37,7 +37,7 @@ async function roomPresents(page, roomId, presentNum) {
     }
 
     await frame
-      .waitForSelector('.g-package-list', { timeout: 3000 })
+      .waitForSelector('.g-package-list', { timeout: 30000 })
       .catch((err) => {
         console.warn(`房间 ${roomId}：未找到礼物box`, err);
       });

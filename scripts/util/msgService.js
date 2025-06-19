@@ -47,13 +47,14 @@ async function sendMessage(title, content, description = '') {
     });
   }
   try {
+    const channelName = '飞书-webhook';
     const postData = JSON.stringify({
       title: title,
       desp: description,
-      content: content + `\n来自：${siteUrl}`,
+      content: `${title}\n\n${content}\nfrom：${siteUrl}`,
       token: MESSAGE_PUSHER_TOKEN,
       // 通道名称 ，不填默认是 飞书-webhook
-      // channel: '飞书-测试应用',
+      channel: channelName,
     });
 
     const response = await axios.post(
