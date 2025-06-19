@@ -48,7 +48,7 @@ async function roomPresents(page, roomId, presentNum) {
     await frame.locator('[title="关闭"]').click();
     await sleep(3000);
   } catch (error) {
-    console.error(`房间 ${roomId}：获取礼物信息失败：`, error);
+    console.error(`房间 ${roomId} 礼物赠送失败：`, error);
   }
 }
 
