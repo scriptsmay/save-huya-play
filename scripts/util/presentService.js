@@ -22,7 +22,7 @@ async function roomPresents(page, roomId, presentNum) {
   // 检查是否已送礼， 如果指定 presentNum ，则不判断
   const status = await checkInService.hasGift(roomId);
   if (status.checked && !presentNum) {
-    timeLog(`Redis 读取到房间 ${roomId}：已赠送虎粮，跳过赠送`);
+    // timeLog(`房间 ${roomId}：已赠送虎粮，跳过赠送`);
     await sleep(3000);
     return;
   }

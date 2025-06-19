@@ -7,19 +7,7 @@ const cookieService = require('./cookieService');
 const SELECTORS = config.DOUYU_SELECTORS;
 
 async function userLoginCheck(browser) {
-  // 检查是否有保存的cookies
-  // if (fs.existsSync('cookies.json')) {
-  //   const cookies = JSON.parse(fs.readFileSync('cookies.json'));
-  //   await browser.setCookie(...cookies);
-  // }
-  const loadResult = await cookieService.loadCookiesFromRedis(
-    browser,
-    'douyu_cookies'
-  );
-  if (loadResult) {
-    timeLog('已从Redis中加载cookies，未过期');
-    // return true;
-  }
+  await cookieService.loadCookiesFromRedis(browser, 'douyu_cookies');
 
   try {
     const page = await browser.newPage();

@@ -9,19 +9,7 @@ const cookieService = require('./cookieService');
 const SELECTORS = config.HUYA_SELECTORS;
 
 async function userLoginCheck(browser) {
-  // // 检查是否有保存的cookies
-  // if (fs.existsSync('cookies.json')) {
-  //   const cookies = JSON.parse(fs.readFileSync('cookies.json'));
-  //   await browser.setCookie(...cookies);
-  // }
-  const loadResult = await cookieService.loadCookiesFromRedis(
-    browser,
-    'huya_cookies'
-  );
-  if (loadResult) {
-    timeLog('已从Redis中加载cookies，未过期');
-    // return true;
-  }
+  await cookieService.loadCookiesFromRedis(browser, 'huya_cookies');
 
   try {
     const page = await browser.newPage();

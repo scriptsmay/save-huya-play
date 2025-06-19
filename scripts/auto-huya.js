@@ -34,6 +34,7 @@ const browserOptions = {
       return;
     }
 
+    // 积分签到
     await goH5CheckIn(browser);
 
     if (!totalRoomCount) {
@@ -41,35 +42,29 @@ const browserOptions = {
       return;
     }
     timeLog(`共需要打卡的虎牙直播间：${totalRoomCount}个`);
-    let needReboot = false;
-    let newPage = await browser.newPage();
+
     for (const roomId of TARGET_ROOM_LIST) {
-      if (roomCount == 5) {
-        await sleep(3000);
-        await newPage.close();
-        timeLog('已打开5个页面，先关闭页面，等待60s再继续操作，以增加容错...');
-        await sleep(60000);
-        newPage = await browser.newPage();
-      }
+      let newPage = await browser.newPage();
+      // 设置页面视图
+      await newPage.setViewport({ width: 1280, height: 800 });
       const result = await autoCheckInRoom(newPage, roomId);
-      if (result) {
-        await sleep(30000);
-      } else {
-        timeLog('浏览器出现未响应错误，跳过后续执行.');
-        needReboot = true;
-        await newPage.close();
-        await sleep(30000);
-        newPage = await browser.newPage();
+      if (!result) {
+        timeLog('浏览器似乎出现了未响应错误...');
       }
+
+      await newPage.close();
+      await sleep(5000);
     }
 
-    if (needReboot) {
-      // 浏览器重启
-      // await browser.close();
+    const num = await redisClient.get('huya:giftNum');
+    if (num > 0) {
+      // 剩余礼物全送给第一个直播间
+      const lastPage = await browser.newPage();
+      await autoCheckInRoom(lastPage, TARGET_ROOM_LIST[0], num);
+      await lastPage.close();
     }
-    await newPage.close();
   } catch (error) {
-    console.error('发生错误:', error);
+    console.error('发生错误:', error.message);
   } finally {
     // 最后打印个时间戳
     timeLog('所有任务完成，正在关闭浏览器...');
@@ -98,7 +93,10 @@ const browserOptions = {
  * @param {*} browser
  */
 async function goH5CheckIn(browser) {
-  if (process.env.HUYA_NOCHECKIN == '1') {
+  const status = await checkInService.hasCheckedIn('user', 'huya');
+  // console.log(status);
+  if (status.checked) {
+    timeLog(`虎牙已签到，跳过执行`);
     // 跳过签到
     return false;
   }
@@ -117,13 +115,16 @@ async function goH5CheckIn(browser) {
     await page.click(SELECTORS.SIGN_IN_BTN).catch((err) => {
       timeLog('未找到“签到”按钮，可能已经签过', err.message);
     });
+    // redis记录一下
+    await checkInService.setCheckIn('user', 'huya');
     // .no-alert 7日不再提醒
     await sleep(2000);
     timeLog('任务中心签到完成');
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
+  } finally {
+    await page.close();
   }
-  await page.close();
 }
 
 /**
@@ -131,7 +132,7 @@ async function goH5CheckIn(browser) {
  * @param {*} page
  * @param {*} roomId
  */
-async function autoCheckInRoom(page, roomId) {
+async function autoCheckInRoom(page, roomId, hasGiftNum = 0) {
   if (!roomId) return false;
   const URL_ROOM = `https://www.huya.com/${roomId}`;
 
@@ -139,12 +140,10 @@ async function autoCheckInRoom(page, roomId) {
     // 检查是否已打卡
     const statusCheck = await checkInService.hasCheckedIn(roomId);
     const statusGift = await checkInService.hasGift(roomId);
-    if (statusCheck.checked && statusGift.checked) {
+    if (statusCheck.checked && statusGift.checked && hasGiftNum == 0) {
       roomCount += 1;
-      timeLog(
-        `房间 ${roomId} 已打卡已送礼，直接跳过...[${roomCount}/${totalRoomCount}]`
-      );
-      await sleep(5000);
+      timeLog(`房间 ${roomId} 跳过执行...[${roomCount}/${totalRoomCount}]`);
+      await sleep(3000);
       return true;
     }
     // 1. 导航到房间页
@@ -152,7 +151,7 @@ async function autoCheckInRoom(page, roomId) {
     await page
       .goto(URL_ROOM, {
         waitUntil: 'domcontentloaded',
-        timeout: 10000,
+        timeout: 30000,
       })
       .catch((error) => {
         console.warn(
@@ -171,8 +170,7 @@ async function autoCheckInRoom(page, roomId) {
     if (!statusCheck.checked) {
       await roomCheckIn(page, roomId);
     }
-
-    await presentService.room(page, roomId);
+    await presentService.room(page, roomId, hasGiftNum);
 
     return true;
   } catch (error) {
