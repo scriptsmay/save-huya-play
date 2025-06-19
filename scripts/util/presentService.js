@@ -43,6 +43,10 @@ async function roomPresents(page, roomId, presentNum) {
       });
     const freeNum = presentNum || DEFAULT_PRESENT_NUM;
     await sendRoomGift(roomId, frame, freeNum);
+
+    // 点击关闭
+    await frame.locator('[title="关闭"]').click();
+    await sleep(3000);
   } catch (error) {
     console.error(`房间 ${roomId}：获取礼物信息失败：`, error);
   }
