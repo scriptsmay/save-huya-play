@@ -62,7 +62,7 @@ async function userLoginCheck(browser) {
         SELECTORS.USER_NAME_ELEMENT
       );
       if (isLoggedIn) {
-        timeLog('已登录，正在保存cookies...');
+        // timeLog('已登录，正在保存cookies...');
         await cookieService.saveCookiesToRedis(page, 'huya_cookies');
         return true;
       } else {
@@ -70,7 +70,7 @@ async function userLoginCheck(browser) {
         return false;
       }
     } else {
-      timeLog('已登录，正在保存cookies...');
+      // timeLog('已登录，正在保存cookies...');
       await cookieService.saveCookiesToRedis(page, 'huya_cookies');
       return username;
     }

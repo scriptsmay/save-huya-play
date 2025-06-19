@@ -54,10 +54,6 @@ async function userLoginCheck(browser) {
         });
 
       return await checkAndSave(page);
-
-      // const cookies = await browser.cookies();
-      // fs.writeFileSync('cookies.json', JSON.stringify(cookies));
-      // timeLog('已保存 cookies 到 cookies.json 文件');
     } else {
       timeLog('已登录，正在保存cookies...');
       await cookieService.saveCookiesToRedis(page, 'douyu_cookies');
