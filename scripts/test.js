@@ -40,10 +40,10 @@ const { sleep, getElementsByText } = require('./util/index');
       '.task-panel-wrap div',
       '领取'
     );
-    console.log(`找到${claimButtons.length}个"领取"按钮`);
     if (claimButtons.length === 0) {
       break;
     }
+    console.log(`找到${claimButtons.length}个"领取"按钮`);
     await claimButtons[0].click();
     await sleep(3000); // 添加一个延迟，防止过快点击
   }

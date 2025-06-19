@@ -55,16 +55,19 @@ const browserOptions = {
       if (result) {
         await sleep(30000);
       } else {
+        timeLog('浏览器出现未响应错误，跳过后续执行.');
         needReboot = true;
-        break;
+        await newPage.close();
+        await sleep(30000);
+        newPage = await browser.newPage();
       }
     }
-    await newPage.close();
+
     if (needReboot) {
       // 浏览器重启
       // await browser.close();
-      timeLog('浏览器出现未响应错误，跳过后续执行.');
     }
+    await newPage.close();
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -142,7 +145,7 @@ async function autoCheckInRoom(page, roomId) {
         `房间 ${roomId} 已打卡已送礼，直接跳过...[${roomCount}/${totalRoomCount}]`
       );
       await sleep(5000);
-      return;
+      return true;
     }
     // 1. 导航到房间页
     timeLog(`开始处理房间 ${roomId}`);
@@ -156,7 +159,6 @@ async function autoCheckInRoom(page, roomId) {
           `房间 ${roomId} 网络加载超时，但一般没影响`,
           error.message
         );
-        return false;
       });
 
     // 获取页面标题并打印
