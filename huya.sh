@@ -8,6 +8,9 @@ cd "$(dirname "$0")" || exit 1
 mkdir -p logs/screenshot
 
 # 显式设置 PATH 环境变量，确保 node 和 npm 可用
+#  brew  PATH
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+brew --version
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
