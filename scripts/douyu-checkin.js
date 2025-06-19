@@ -106,11 +106,11 @@ async function goTaskCenter(browser) {
     await sleep(10000);
   } catch (error) {
     console.error(`打开任务中心 ${URL_TASK} 发生错误:`, error);
+    await goScreenShot(page);
   }
 
   await goGameTask(browser, page);
   await sleep(5000);
-  await goScreenShot(page);
 
   await page.close();
 
