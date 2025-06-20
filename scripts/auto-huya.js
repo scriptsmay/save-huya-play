@@ -56,13 +56,13 @@ const browserOptions = {
       await sleep(5000);
     }
 
-    const num = await redisClient.get('huya:giftNum');
-    if (num > 0) {
-      // 剩余礼物全送给第一个直播间
-      const lastPage = await browser.newPage();
-      await autoCheckInRoom(lastPage, TARGET_ROOM_LIST[0], num);
-      await lastPage.close();
-    }
+    // 剩余礼物全送给第一个直播间
+    // const num = await redisClient.get('huya:giftNum');
+    // if (num > 0) {
+    //   const lastPage = await browser.newPage();
+    //   await autoCheckInRoom(lastPage, TARGET_ROOM_LIST[0], num);
+    //   await lastPage.close();
+    // }
   } catch (error) {
     console.error('发生错误:', error.message);
   } finally {
