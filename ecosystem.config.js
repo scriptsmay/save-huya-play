@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     // 主应用 - Express服务器
     {
-      name: 'express-server',
+      name: 'server',
       script: 'npm',
       args: 'start',
       watch: true, // 可选：监听文件变化自动重启
@@ -36,11 +36,12 @@ module.exports = {
     // },
 
     // 定时任务2
+    // 1点运行
     {
       name: 'hourly-cleanup',
       script: 'npm',
       args: 'run cleanup',
-      cron_restart: '0 * * * *', // 每小时运行一次
+      cron_restart: '0 1 * * *',
       autorestart: false,
       watch: false,
     },
