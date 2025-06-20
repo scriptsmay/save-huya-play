@@ -129,7 +129,7 @@ async function updateImage(filePath) {
     .then((res) => {
       // 返回数据结构：
       // { "image_key": "img_v2_xxx" }
-      console.log('Lark updateImageResult', res);
+      // console.log('Lark updateImageResult', res);
       if (res) {
         return res['image_key'];
       }

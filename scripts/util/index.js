@@ -100,7 +100,6 @@ function getSecondsUntilMidnight() {
 }
 
 function getScreenShotPath(filename) {
-  console.log('__dirname', __dirname);
   return path.join(__dirname, '../../logs/screenshot/', filename);
 }
 
@@ -124,14 +123,18 @@ const getElementsByText = async (page, selector, text) => {
   return filtered;
 };
 
-// 获取今日日期字符串
-function getTodayDateString() {
+/**
+ * 获取今日日期字符串，如 20250520
+ * @param {string} split 分隔符，默认为空。例如值为 '-' 则返回 2025-05-20
+ * @returns
+ */
+function getTodayDateString(split = '') {
   const now = new Date();
   return [
     now.getFullYear(),
     String(now.getMonth() + 1).padStart(2, '0'),
     String(now.getDate()).padStart(2, '0'),
-  ].join('');
+  ].join(split);
 }
 
 // 异步查找今日的截图文件
@@ -190,4 +193,5 @@ module.exports = {
   getElementsByText,
   getSecondsUntilMidnight,
   findTodayScreenshots,
+  getTodayDateString,
 };

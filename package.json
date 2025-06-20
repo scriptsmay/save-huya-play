@@ -9,7 +9,8 @@
     "huya-checkin": "node scripts/huya-checkin.js",
     "kpl": "node scripts/huya-kpl.js",
     "huyabadge": "node scripts/huya-badgelist.js",
-    "douyu": "node scripts/douyu-checkin.js"
+    "douyu": "node scripts/douyu-checkin.js",
+    "kpl-everyday": "node scripts/kpl-everyday.js"
   },
   "repository": {
     "type": "git",
