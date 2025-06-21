@@ -45,7 +45,8 @@ async function roomPresents(page, roomId, presentNum) {
     await sendRoomGift(roomId, frame, freeNum);
 
     // 点击关闭
-    await frame.locator('[title="关闭"]').click();
+    await sleep(3000);
+    await page.locator('.dlg-close[title="关闭"]').click();
     await sleep(3000);
   } catch (error) {
     console.error(`房间 ${roomId} 礼物赠送失败：`, error.message);
@@ -100,6 +101,7 @@ async function submitGift(roomId, page, count) {
     });
   // 选择input框输入赠送数量
   await page.click(SELECTORS.PRESENT_INPUT);
+  await sleep(1000);
   await page.type(SELECTORS.PRESENT_INPUT, count.toString());
   await sleep(1000);
 
@@ -107,7 +109,7 @@ async function submitGift(roomId, page, count) {
     .waitForSelector(SELECTORS.PRESENT_SUBMIT, { timeout: 10000 })
     .then(async () => {
       // 点击赠送按钮
-      timeLog(`房间 ${roomId}：点击赠送按钮`);
+      // timeLog(`房间 ${roomId}：点击赠送按钮`);
       await page.click(SELECTORS.PRESENT_SUBMIT);
 
       timeLog(`房间 ${roomId}：赠送成功 ${count} 个`);
