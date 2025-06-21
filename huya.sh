@@ -53,6 +53,8 @@ run_npm huya-checkin
 sleep 5
 run_npm huyabadge
 sleep 5
+run_npm gemini
+sleep 5
 run_npm douyu
 
 echo "执行完毕"

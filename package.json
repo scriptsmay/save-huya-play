@@ -13,6 +13,7 @@
     "huyabadge": "node scripts/huya-badgelist.js",
     "douyu": "node scripts/douyu-checkin.js",
     "kpl-everyday": "node scripts/kpl-everyday.js",
+    "gemini": "node scripts/douyu-live.js",
     "cleanup": "node scripts/cleanup.js"
   },
   "repository": {

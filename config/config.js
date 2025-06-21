@@ -130,4 +130,6 @@ const config = {
   ],
 };
 
+console.log('config.NODE_ENV', config.NODE_ENV);
+
 module.exports = config;

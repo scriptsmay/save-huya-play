@@ -43,7 +43,7 @@ async function userLoginCheck(browser) {
 
       return await checkAndSave(page);
     } else {
-      timeLog('已登录，正在保存cookies...');
+      // timeLog('已登录，正在保存cookies...');
       await cookieService.saveCookiesToRedis(page, 'douyu_cookies');
       return true;
     }
@@ -58,7 +58,7 @@ async function checkAndSave(page) {
     SELECTORS.USER_NAME_ELEMENT
   );
   if (isLoggedIn) {
-    timeLog('已登录，正在保存cookies...');
+    // timeLog('已登录，正在保存cookies...');
     await cookieService.saveCookiesToRedis(page);
     return true;
   } else {

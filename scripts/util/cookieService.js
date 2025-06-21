@@ -16,7 +16,7 @@ async function saveCookiesToRedis(page, key = 'browser_cookies') {
   // 存储到 Redis，设置过期时间为最远的 Cookie 过期时间
   await redisClient.set(key, JSON.stringify(cookiesWithTimestamp));
 
-  console.log('Cookies saved to Redis');
+  // console.log('Cookies saved to Redis');
 }
 
 /**
