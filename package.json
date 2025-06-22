@@ -10,7 +10,7 @@
     "huya": "node scripts/auto-huya.js",
     "huya-checkin": "node scripts/huya-checkin.js",
     "kpl": "node scripts/huya-kpl.js",
-    "huyabadge": "node scripts/huya-badgelist.js",
+    "badge": "node scripts/huya-badgelist.js && node scripts/douyu-badgelist.js",
     "douyu": "node scripts/douyu-checkin.js",
     "kpl-everyday": "node scripts/kpl-everyday.js",
     "gemini": "node scripts/douyu-live.js",

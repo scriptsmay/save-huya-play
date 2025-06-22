@@ -51,7 +51,7 @@ run_npm huya
 sleep 5
 run_npm huya-checkin
 sleep 5
-run_npm huyabadge
+run_npm badge
 sleep 5
 run_npm gemini
 sleep 5
