@@ -47,6 +47,7 @@ const browserOptions = {
       const result = await autoCheckInRoom(browser, roomId);
       if (!result) {
         timeLog('浏览器似乎出现了未响应错误...');
+        break;
       }
       await sleep(5000);
     }
