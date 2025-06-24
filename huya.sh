@@ -51,10 +51,10 @@ run_npm huya
 sleep 5
 run_npm huya-checkin
 sleep 5
-run_npm badge
-sleep 5
 run_npm gemini
 sleep 5
 run_npm douyu
+sleep 5
+run_npm badge
 
 echo "执行完毕"

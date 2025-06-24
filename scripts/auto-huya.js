@@ -44,15 +44,10 @@ const browserOptions = {
     timeLog(`共需要打卡的虎牙直播间：${totalRoomCount}个`);
 
     for (const roomId of TARGET_ROOM_LIST) {
-      let newPage = await browser.newPage();
-      // 设置页面视图
-      await newPage.setViewport({ width: 1280, height: 800 });
-      const result = await autoCheckInRoom(newPage, roomId);
+      const result = await autoCheckInRoom(browser, roomId);
       if (!result) {
         timeLog('浏览器似乎出现了未响应错误...');
       }
-
-      await newPage.close();
       await sleep(5000);
     }
 
@@ -112,14 +107,17 @@ async function goH5CheckIn(browser) {
       timeLog('任务中心：未找到按钮', err.message);
     });
     // 等待并点击“签到”按钮
-    await page.click(SELECTORS.SIGN_IN_BTN).catch((err) => {
-      timeLog('未找到“签到”按钮，可能已经签过', err.message);
-    });
-    // redis记录一下
-    await checkInService.setCheckIn('user', 'huya');
-    // .no-alert 7日不再提醒
-    await sleep(2000);
-    timeLog('任务中心签到完成');
+    await page
+      .click(SELECTORS.SIGN_IN_BTN)
+      .then(async () => {
+        // redis记录一下
+        await checkInService.setCheckIn('user', 'huya');
+        await sleep(2000);
+        timeLog('任务中心签到完成');
+      })
+      .catch((err) => {
+        timeLog('未找到“签到”按钮，可能已经签过', err.message);
+      });
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
   } finally {
@@ -132,9 +130,11 @@ async function goH5CheckIn(browser) {
  * @param {*} page
  * @param {*} roomId
  */
-async function autoCheckInRoom(page, roomId, hasGiftNum = 0) {
+async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
   if (!roomId) return false;
   const URL_ROOM = `https://www.huya.com/${roomId}`;
+  let roomPage;
+  let checkResult = false;
 
   try {
     // 检查是否已打卡
@@ -144,11 +144,14 @@ async function autoCheckInRoom(page, roomId, hasGiftNum = 0) {
       roomCount += 1;
       timeLog(`房间 ${roomId} 跳过执行...[${roomCount}/${totalRoomCount}]`);
       await sleep(3000);
-      return true;
+      checkResult = true;
     }
+    roomPage = await browser.newPage();
+    // 设置页面视图
+    await roomPage.setViewport({ width: 1280, height: 800 });
     // 1. 导航到房间页
     timeLog(`开始处理房间 ${roomId}`);
-    await page
+    await roomPage
       .goto(URL_ROOM, {
         waitUntil: 'domcontentloaded',
         timeout: 30000,
@@ -161,23 +164,31 @@ async function autoCheckInRoom(page, roomId, hasGiftNum = 0) {
       });
 
     // 获取页面标题并打印
-    const title = await page.title();
+    const title = await roomPage.title();
     timeLog(`页面标题： ${title}`);
 
     // 等待15s
     await sleep(15000);
 
     if (!statusCheck.checked) {
-      await roomCheckIn(page, roomId);
+      await roomCheckIn(roomPage, roomId);
     }
-    await presentService.room(page, roomId, hasGiftNum);
+    await presentService.room(roomPage, roomId, hasGiftNum);
 
-    return true;
+    checkResult = true;
   } catch (error) {
     console.error(`房间 ${roomId} 自动打卡过程中发生错误:`, error);
-
-    return false;
+    // checkResult = false;
+  } finally {
+    if (roomPage) {
+      await roomPage.close();
+    }
+    // roomCount += 1;
+    // timeLog(`房间 ${roomId} 打卡完成...[${roomCount}/${totalRoomCount}]`);
+    await sleep(3000);
   }
+
+  return checkResult;
 }
 
 /**
