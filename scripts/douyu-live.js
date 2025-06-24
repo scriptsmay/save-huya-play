@@ -72,7 +72,7 @@ async function goMainTask(browser) {
       waitUntil: 'networkidle2',
       timeout: 30000,
     });
-    await sleep(5000);
+    await sleep(15000);
     // 获取页面标题并打印
     const title = await page.title();
     timeLog(`页面标题： ${title}`);
@@ -129,6 +129,10 @@ async function roomCheckIn(page, roomId) {
   const PACKAGE_BTN_SELECTOR = '.BackpackButton';
   const GIFT_ITEM_SELECTOR = '.Backpack-prop.is-effect';
   const giftCountSelector = `${GIFT_ITEM_SELECTOR} .Backpack-propCount`;
+
+  // 第一次进入直播间会有个弹框提示，先刷新页面
+  await page.reload();
+  await sleep(10000);
 
   // 点击背包
   await page.locator(PACKAGE_BTN_SELECTOR).click();
