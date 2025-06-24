@@ -27,6 +27,10 @@ const msgService = require('./util/msgService');
     }
 
     await pcTaskCenter(browser);
+
+    await sleep(5000);
+
+    await matchPredict(browser);
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -60,7 +64,7 @@ async function pcTaskCenter(browser) {
 
     // 等待任务面板加载
     await page.waitForSelector('.task-panel-wrap');
-    timeLog('任务面板已加载');
+    // timeLog('任务面板已加载');
     await sleep(1000); // 等待1秒防止过快点击
 
     while (true) {
@@ -93,6 +97,61 @@ async function pcTaskCenter(browser) {
     );
   } finally {
     timeLog('虎牙PC任务中心任务结束，关闭页面');
+    await page.close();
+  }
+}
+
+/**
+ * 虎牙h5 赛事预言自动领取预言币
+ */
+async function matchPredict(browser) {
+  timeLog('开始：虎牙赛事预言...');
+  const page = await browser.newPage();
+  try {
+    await page.goto(config.URLS.URL_HUYA_MATCH_YUYAN_POINT, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
+
+    // 等待任务面板加载
+    await page.waitForSelector('.sign_in_info');
+    // timeLog('签到面板已加载');
+    await sleep(1000); // 等待1秒防止过快点击
+
+    await page.locator('.sign_in_btn').click();
+
+    await sleep(1000);
+
+    while (true) {
+      let claimButtons = await getElementsByText(
+        page,
+        '.task_list_ul .action_btn.on',
+        '领取'
+      );
+
+      if (claimButtons.length === 0) {
+        break;
+      }
+      timeLog(`找到${claimButtons.length}个"领取"按钮，点击领取`);
+      await claimButtons[0].click();
+      await sleep(5000); // 添加一个延迟，防止过快点击
+    }
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await sleep(10000);
+
+    const point = await page.$eval(
+      '.balance_detail .coin_count',
+      (el) => el.textContent
+    );
+    timeLog(`预言币余额：${point}`);
+  } catch (error) {
+    console.error(
+      `打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
+      error.message
+    );
+  } finally {
+    timeLog('任务结束，关闭页面');
     await page.close();
   }
 }
