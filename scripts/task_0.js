@@ -20,7 +20,8 @@ const browserOptions = {
   // 添加任务
   const urls = ['https://www.huya.com/kpl', 'https://www.douyu.com/998'];
 
-  const tasks = urls.map((url) => pageTask({ browser, url }, 120));
+  // 来个5分钟挂机
+  const tasks = urls.map((url) => pageTask({ browser, url }, 60 * 5));
 
   // 结果收集
   const results = await Promise.all(tasks);
@@ -39,7 +40,7 @@ const browserOptions = {
   process.exit(1);
 });
 
-async function pageTask(context, timeout = 120) {
+async function pageTask(context, delaySeconds = 120) {
   // 正确方式访问browser
   const { browser, url } = context;
   try {
@@ -82,7 +83,7 @@ async function pageTask(context, timeout = 120) {
 
     // 等待
     timeLog('Waiting for 2 minutes...');
-    for (let i = 0; i < timeout; i++) {
+    for (let i = 0; i < delaySeconds; i++) {
       await sleep(1000);
       if (i % 10 === 0) timeLog(`Waited ${i} seconds...`);
     }
