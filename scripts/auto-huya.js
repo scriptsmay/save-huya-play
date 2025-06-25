@@ -34,9 +34,6 @@ const browserOptions = {
       return;
     }
 
-    // 积分签到
-    await goH5CheckIn(browser);
-
     if (!totalRoomCount) {
       console.error('请设置虎牙直播间ID: HUYA_ROOM_LIST');
       return;
@@ -83,48 +80,6 @@ const browserOptions = {
       });
   }
 })();
-
-/**
- * 每日任务中心签到
- * @param {*} browser
- */
-async function goH5CheckIn(browser) {
-  const status = await checkInService.hasCheckedIn('user', 'huya');
-  // console.log(status);
-  if (status.checked) {
-    timeLog(`虎牙已签到，跳过执行`);
-    // 跳过签到
-    return false;
-  }
-  const page = await browser.newPage();
-  const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
-  try {
-    await page.goto(URL_TASK, {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000,
-    });
-    // await sleep(5000);
-    await page.waitForSelector('button').catch((err) => {
-      timeLog('任务中心：未找到按钮', err.message);
-    });
-    // 等待并点击“签到”按钮
-    await page
-      .click(SELECTORS.SIGN_IN_BTN)
-      .then(async () => {
-        // redis记录一下
-        await checkInService.setCheckIn('user', 'huya');
-        await sleep(2000);
-        timeLog('任务中心签到完成');
-      })
-      .catch((err) => {
-        timeLog('未找到“签到”按钮，可能已经签过', err.message);
-      });
-  } catch (error) {
-    console.error('打开任务中心 URL_TASK 发生错误:', error);
-  } finally {
-    await page.close();
-  }
-}
 
 /**
  * 执行直播间任务
