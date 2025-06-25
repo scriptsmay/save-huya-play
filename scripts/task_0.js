@@ -34,7 +34,7 @@ const browserOptions = {
 
   timeLog('All tasks completed. Results:', results);
   await browser.close();
-  redisClient.disconnect();
+  await redisClient.disconnect();
 })().catch((err) => {
   timeLog('error:', err);
   process.exit(1);

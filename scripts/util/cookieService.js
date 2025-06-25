@@ -68,48 +68,4 @@ async function checkLoginStatus(page, checkSelector = '.user_name') {
   }
 }
 
-// // 主函数
-// async function main() {
-//   const browser = await puppeteer.launch({
-//     headless: false, // 设置为 true 以无头模式运行
-//     args: ['--no-sandbox', '--disable-setuid-sandbox'],
-//   });
-
-//   const page = await browser.newPage();
-
-//   // 尝试从 Redis 加载 Cookie
-//   const hasValidCookies = await loadCookiesFromRedis(page);
-
-//   // 导航到目标网站
-//   await page.goto('https://example.com/login'); // 替换为目标网站
-
-//   // 检查登录状态
-//   const isLoggedIn = await checkLoginStatus(page);
-
-//   if (!isLoggedIn) {
-//     console.log('Not logged in, performing login...');
-
-//     // 执行登录操作（根据你的网站修改）
-//     await page.type('#username', 'your_username');
-//     await page.type('#password', 'your_password');
-//     await page.click('#login-button');
-
-//     // 等待登录完成
-//     await page.waitForNavigation();
-
-//     // 保存新的 Cookie 到 Redis
-//     await saveCookiesToRedis(page);
-//   } else {
-//     console.log('Already logged in using cookies from Redis');
-//   }
-
-//   // 在这里继续你的其他操作...
-
-//   // 关闭浏览器时再次保存 Cookie（可选）
-//   browser.on('disconnected', async () => {
-//     await saveCookiesToRedis(page);
-//     await redisClient.disconnect();
-//   });
-// }
-
 module.exports = { saveCookiesToRedis, loadCookiesFromRedis, checkLoginStatus };

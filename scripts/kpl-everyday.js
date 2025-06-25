@@ -38,8 +38,6 @@ const OUTPUT_FILE = `logs/screenshot/${IMAGE_FILENAME}`;
     // 最后打印个时间戳
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
-    // 关闭redis,否则会卡住
-    // await redisClient.disconnect();
   }
 })();
 
