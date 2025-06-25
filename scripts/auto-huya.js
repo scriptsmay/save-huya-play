@@ -101,37 +101,37 @@ async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
       timeLog(`房间 ${roomId} 跳过执行...[${roomCount}/${totalRoomCount}]`);
       await sleep(3000);
       checkResult = true;
+    } else {
+      roomPage = await browser.newPage();
+      // 设置页面视图
+      await roomPage.setViewport({ width: 1280, height: 800 });
+      // 1. 导航到房间页
+      timeLog(`开始处理房间 ${roomId}`);
+      await roomPage
+        .goto(URL_ROOM, {
+          waitUntil: 'domcontentloaded',
+          timeout: 30000,
+        })
+        .catch((error) => {
+          console.warn(
+            `房间 ${roomId} 网络加载超时，但一般没影响`,
+            error.message
+          );
+        });
+
+      // 获取页面标题并打印
+      const title = await roomPage.title();
+      timeLog(`页面标题： ${title}`);
+
+      // 等待15s
+      await sleep(15000);
+
+      if (!statusCheck.checked) {
+        await roomCheckIn(roomPage, roomId);
+      }
+      await presentService.room(roomPage, roomId, hasGiftNum);
+      checkResult = true;
     }
-    roomPage = await browser.newPage();
-    // 设置页面视图
-    await roomPage.setViewport({ width: 1280, height: 800 });
-    // 1. 导航到房间页
-    timeLog(`开始处理房间 ${roomId}`);
-    await roomPage
-      .goto(URL_ROOM, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      })
-      .catch((error) => {
-        console.warn(
-          `房间 ${roomId} 网络加载超时，但一般没影响`,
-          error.message
-        );
-      });
-
-    // 获取页面标题并打印
-    const title = await roomPage.title();
-    timeLog(`页面标题： ${title}`);
-
-    // 等待15s
-    await sleep(15000);
-
-    if (!statusCheck.checked) {
-      await roomCheckIn(roomPage, roomId);
-    }
-    await presentService.room(roomPage, roomId, hasGiftNum);
-
-    checkResult = true;
   } catch (error) {
     console.error(`房间 ${roomId} 自动打卡过程中发生错误:`, error);
     // checkResult = false;
