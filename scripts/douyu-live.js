@@ -20,6 +20,16 @@ const config = require('../config/config');
 const LIVE_ROOM_ID = '36252';
 const URL_DOUYU_LIVE_PAGE = `https://www.douyu.com/${LIVE_ROOM_ID}`;
 
+// const GIFT_PANEL_SELECTOR = '.BackpackInfoPanel';
+// const SELECTORS = {
+//   PANEL: '.BackpackInfoPanel',
+//   GIFT_NAME: '.BackpackInfoPanel-name',
+//   EXPIRE_TEXT: '.BackpackInfoPanel-expiry',
+//   // 全部btn
+//   COUNT_BTN: '.BackpackInfoPanelBatchProp-content',
+//   SEND_BTN: '.BackpackInfoPanelBatchProp-sendButton',
+// };
+
 (async () => {
   // 启动浏览器
   const browser = await puppeteer.launch({
@@ -62,26 +72,36 @@ const URL_DOUYU_LIVE_PAGE = `https://www.douyu.com/${LIVE_ROOM_ID}`;
 
 // 去直播间打卡
 async function goMainTask(browser) {
-  const page = await browser.newPage();
+  let page = await browser.newPage();
 
   try {
-    await page.setViewport({ width: 1280, height: 800 });
-
     await page.goto(URL_DOUYU_LIVE_PAGE, {
-      // waitUntil: 'domcontentloaded',
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
+      // waitUntil: 'networkidle2',
       timeout: 30000,
     });
     await sleep(15000);
     // 获取页面标题并打印
     const title = await page.title();
     timeLog(`页面标题： ${title}`);
+    await page.close();
+    await sleep(15000);
+
     // 检查是否已打卡
     const status = await checkInService.hasCheckedIn(LIVE_ROOM_ID, 'douyu');
     // console.log(status);
     if (status.checked) {
       timeLog(`房间 ${LIVE_ROOM_ID} 已打卡，跳过执行`);
     } else {
+      page = await browser.newPage();
+      await page.setViewport({ width: 1280, height: 800 });
+
+      await page.goto(URL_DOUYU_LIVE_PAGE, {
+        waitUntil: 'domcontentloaded',
+        // waitUntil: 'networkidle2',
+        timeout: 30000,
+      });
+      await sleep(10000);
       await roomCheckIn(page, LIVE_ROOM_ID);
     }
     // await roomCheckIn(page, LIVE_ROOM_ID);
@@ -138,8 +158,17 @@ async function roomCheckIn(page, roomId) {
   await page.locator(PACKAGE_BTN_SELECTOR).click();
   await sleep(5000);
 
+  const result = await page
+    .waitForSelector(GIFT_ITEM_SELECTOR)
+    .catch(async () => {
+      return false;
+    });
+  if (!result) {
+    await page.click(PACKAGE_BTN_SELECTOR);
+    await sleep(5000);
+  }
+
   // 礼物数量
-  await page.waitForSelector(GIFT_ITEM_SELECTOR);
   const giftCount = await page.evaluate((selector) => {
     const countEl = document.querySelector(selector);
     return countEl?.textContent.trim() || '';
@@ -149,7 +178,8 @@ async function roomCheckIn(page, roomId) {
   // 普通荧光棒点击赠送n次
   for (let i = 0; i < parseInt(giftCount); i++) {
     await page.locator(GIFT_ITEM_SELECTOR).click();
-    await sleep(500); // 500ms 间隔
+    timeLog(`${roomId}：点击 ${i + 1}/${giftCount}`);
+    await sleep(1500); // 500ms 间隔
   }
   // await page.locator(GIFT_ITEM_SELECTOR).click();
   await sleep(1000);
