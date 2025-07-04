@@ -70,6 +70,24 @@ const DOUYU_SELECTORS = {
   // SIGN_IN_SUCCESS: '.task-sign-success',
 };
 
+/**
+ * 斗鱼直播间配置
+ */
+const DOUYU_ROOMS = [
+  {
+    roomId: '36252',
+    name: 'gemini',
+  },
+  {
+    roomId: '10560893',
+    name: '北笙',
+  },
+  {
+    roomId: '410800',
+    name: '花海',
+  },
+];
+
 const qqMsgTpl = {
   group_id: 1034923436,
   message: [
@@ -128,6 +146,8 @@ const config = {
     // 可以添加更多类型的API地址
     // { type: 'wechat', url: 'http://example.com/wechat_api' }
   ],
+
+  DOUYU_ROOMS,
 };
 
 console.log('config.NODE_ENV', config.NODE_ENV);

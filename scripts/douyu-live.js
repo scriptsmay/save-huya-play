@@ -178,11 +178,12 @@ async function roomCheckIn(page, roomId) {
   // 普通荧光棒点击赠送n次
   for (let i = 0; i < parseInt(giftCount); i++) {
     await page.locator(GIFT_ITEM_SELECTOR).click();
-    timeLog(`${roomId}：点击 ${i + 1}/${giftCount}`);
+    console.log(`${roomId}：点击 ${i + 1}/${giftCount}`);
     await sleep(1500); // 500ms 间隔
   }
+
   // await page.locator(GIFT_ITEM_SELECTOR).click();
   await sleep(1000);
-
+  timeLog(`${roomId}：已赠送 ${giftCount}`);
   await checkInService.setCheckIn(roomId, 'douyu');
 }
