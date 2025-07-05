@@ -61,7 +61,7 @@ const SELECTORS = config.HUYA_SELECTORS;
  * 打开KPL页面停留5分钟
  */
 async function kplCheckIn(browser) {
-  timeLog('开始执行虎牙KPL页面...');
+  timeLog('【虎牙KPL】打开页面停留5分钟...');
   const page = await browser.newPage();
   try {
     await page.goto(config.URLS.URL_HUYA_LIVE_KPL, {
@@ -71,7 +71,7 @@ async function kplCheckIn(browser) {
 
     // 获取当前页面的标题
     const pageTitle = await page.title();
-    timeLog(`页面标题： ${pageTitle}`);
+    timeLog(`【虎牙KPL】页面标题： ${pageTitle}`);
 
     return await sleep(5 * 60000);
   } catch (error) {
@@ -85,13 +85,13 @@ async function kplCheckIn(browser) {
  * @param {*} browser
  */
 async function goH5CheckIn(browser) {
-  const status = await checkInService.hasCheckedIn('user', 'huya');
-  // console.log(status);
-  if (status.checked) {
-    timeLog(`虎牙已签到，跳过执行`);
-    // 跳过签到
-    return false;
-  }
+  // const status = await checkInService.hasCheckedIn('user', 'huya');
+  // // console.log(status);
+  // if (status.checked) {
+  //   timeLog(`虎牙已签到，跳过执行`);
+  //   // 跳过签到
+  //   return false;
+  // }
   const page = await browser.newPage();
   const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
   try {
@@ -101,19 +101,26 @@ async function goH5CheckIn(browser) {
     });
     await sleep(5000);
     await page.waitForSelector('.gift-list-wrap').catch((err) => {
-      timeLog('任务中心：未加载面板', err.message);
+      timeLog('h5任务中心：未加载面板', err.message);
     });
     // 等待并点击“签到”按钮
     await page
       .click(SELECTORS.SIGN_IN_BTN)
       .then(async () => {
-        // redis记录一下
-        await checkInService.setCheckIn('user', 'huya');
-        await sleep(2000);
-        timeLog('任务中心签到完成');
+        // 弹出了安全验证
+        const checkResult = await checkSafeVerification(page);
+        console.log(checkResult);
+        if (!checkResult) {
+          // redis记录一下
+          await checkInService.setCheckIn('user', 'huya');
+          await sleep(2000);
+          timeLog('h5任务中心：签到完成');
+        } else {
+          timeLog('h5任务中心：签到失败，出现安全验证需要手动执行！！');
+        }
       })
       .catch((err) => {
-        timeLog('未找到“签到”按钮，可能已经签过', err.message);
+        timeLog('h5任务中心：未找到“签到”按钮，可能已经签过', err.message);
       });
   } catch (error) {
     console.error('打开任务中心 URL_TASK 发生错误:', error);
@@ -122,12 +129,17 @@ async function goH5CheckIn(browser) {
   }
 }
 
+async function checkSafeVerification(page) {
+  const isSafeVerification = await page.locator('.dialog-safe');
+  return isSafeVerification;
+}
+
 /**
  * pc任务中心白嫖积分
  * @param {*} browser
  */
 async function pcTaskCenter(browser) {
-  timeLog('开始执行虎牙pc任务中心任务...');
+  timeLog('虎牙pc任务：开始执行...');
   const page = await browser.newPage();
   try {
     await page.goto(config.URLS.URL_HUYA_TASK_CENTER, {
@@ -150,7 +162,7 @@ async function pcTaskCenter(browser) {
       if (claimButtons.length === 0) {
         break;
       }
-      timeLog(`找到${claimButtons.length}个"领取"按钮，点击领取`);
+      timeLog(`虎牙pc任务：找到${claimButtons.length}个"领取"按钮，点击领取`);
       await claimButtons[0].click();
       await sleep(5000); // 添加一个延迟，防止过快点击
     }
@@ -162,14 +174,14 @@ async function pcTaskCenter(browser) {
       config.HUYA_SELECTORS.HUYA_POINTS,
       (el) => el.textContent
     );
-    timeLog(`虎牙任务中心 当前积分：${point}`);
+    timeLog(`虎牙pc任务：当前积分：${point}`);
   } catch (error) {
     console.error(
       `打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
       error.message
     );
   } finally {
-    timeLog('虎牙PC任务中心任务结束，关闭页面');
+    timeLog('虎牙pc任务：任务结束，关闭页面');
     await page.close();
   }
 }
@@ -178,7 +190,7 @@ async function pcTaskCenter(browser) {
  * 虎牙h5 赛事预言自动领取预言币
  */
 async function matchPredict(browser) {
-  timeLog('开始：虎牙赛事预言...');
+  timeLog('虎牙赛事预言：开始执行...');
   const page = await browser.newPage();
   try {
     await page.goto(config.URLS.URL_HUYA_MATCH_YUYAN_POINT, {
@@ -195,7 +207,7 @@ async function matchPredict(browser) {
       .locator('.sign_in_btn')
       .click()
       .then(() => {
-        timeLog('虎牙赛事预言:点击签到');
+        timeLog('虎牙赛事预言：已点击签到');
       });
 
     await sleep(1000);
@@ -210,7 +222,7 @@ async function matchPredict(browser) {
       if (claimButtons.length === 0) {
         break;
       }
-      timeLog(`找到${claimButtons.length}个"领取"按钮，点击领取`);
+      timeLog(`虎牙赛事预言：找到${claimButtons.length}个"领取"按钮，点击领取`);
       await claimButtons[0].click();
       await sleep(5000); // 添加一个延迟，防止过快点击
     }
@@ -222,14 +234,14 @@ async function matchPredict(browser) {
       '.balance_detail .coin_count',
       (el) => el.textContent
     );
-    timeLog(`虎牙赛事预言 预言币余额：${point}`);
+    timeLog(`虎牙赛事预言：预言币余额：${point}`);
   } catch (error) {
     console.error(
-      `打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
+      `虎牙赛事预言：打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
       error.message
     );
   } finally {
-    timeLog('任务结束，关闭页面');
+    timeLog('虎牙赛事预言：任务结束，关闭页面');
     await page.close();
   }
 }
