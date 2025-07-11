@@ -90,13 +90,22 @@ class RedisClient {
   }
 
   async disconnect() {
+    // 如果客户端不存在或已经断开连接，则直接返回
+    if (!this.client || !this._isConnected) {
+      return;
+    }
+    this._isConnected = false;
     try {
-      this._isConnected = false;
       await this.client.quit();
     } catch (err) {
       console.error('Redis disconnect failed:', err);
-      // 强制断开连接
-      await this.client.destroy();
+      try {
+        // 强制断开连接
+        await this.client.destroy();
+        console.log('Redis 已强制断开');
+      } catch (destroyErr) {
+        console.error('Redis force disconnect also failed:', destroyErr);
+      }
     }
   }
 
