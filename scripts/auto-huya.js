@@ -139,8 +139,6 @@ async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
     if (roomPage) {
       await roomPage.close();
     }
-    // roomCount += 1;
-    // timeLog(`房间 ${roomId} 打卡完成...[${roomCount}/${totalRoomCount}]`);
     await sleep(3000);
   }
 
@@ -160,13 +158,12 @@ async function roomCheckIn(page, roomId) {
 
   // 3. hover徽章
   await page.hover(badgeSelector);
-  // console.log(`房间 ${roomId}：hover 粉丝牌`);
 
   // 4. 等待按钮出现并查找
   await page
     .waitForSelector(`${badgeSelector} a`, { timeout: 10000 })
     .catch(async (err) => {
-      timeLog(
+      console.log(
         `房间 ${roomId}：未找到按钮 ${badgeSelector} a，请检查页面结构`,
         err.message
       );
@@ -182,14 +179,13 @@ async function roomCheckIn(page, roomId) {
 
     if (text.includes(SELECTORS.CPL_BTN_TEXT)) {
       setRedisCheckIn = true;
-      timeLog(
+      console.log(
         `房间 ${roomId}：已完成，跳过打卡 [${roomCount}/${totalRoomCount}]`
       );
       break;
     } else if (text.includes(SELECTORS.CHECK_BTN_TEXT)) {
-      timeLog(`房间 ${roomId}：开始打卡...[${roomCount}/${totalRoomCount}]`);
+      // timeLog(`房间 ${roomId}：开始打卡...[${roomCount}/${totalRoomCount}]`);
       await btn.click();
-      timeLog(`房间 ${roomId}：每日打卡福利领取成功`);
       setRedisCheckIn = true;
 
       break;
@@ -201,6 +197,9 @@ async function roomCheckIn(page, roomId) {
     await checkInService.setCheckIn(roomId);
     // timeLog(result);
     roomCount += 1;
+    timeLog(
+      `房间 ${roomId}：每日打卡福利领取成功[${roomCount}/${totalRoomCount}]`
+    );
   }
 
   await sleep(15000);

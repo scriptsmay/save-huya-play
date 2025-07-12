@@ -26,13 +26,13 @@ async function roomPresents(page, roomId, presentNum) {
     await sleep(3000);
     return;
   }
-  timeLog(`房间 ${roomId}：开始进行免费礼物赠送`);
+  console.log(`房间 ${roomId}：开始进行免费礼物赠送`);
 
   try {
     const frame = await getTheIframe(page, roomId);
 
     if (!frame) {
-      timeLog(`房间 ${roomId}：未找到礼物iframe`);
+      console.log(`房间 ${roomId}：未找到礼物iframe`);
       return false;
     }
 
@@ -70,16 +70,24 @@ async function getAvailableGifts(frame) {
   }
   return availableGifts;
 }
-
+/**
+ * 赠送虎粮
+ * @param {*} roomId
+ * @param {*} frame
+ * @param {*} giftIcon
+ * @param {*} text
+ * @param {*} count
+ * @returns
+ */
 async function sendGiftAndRefresh(roomId, frame, giftIcon, text, count) {
   try {
-    timeLog(`房间 ${roomId}：赠送 ${text}，数量 ${count}`);
+    // timeLog(`房间 ${roomId}：赠送 ${text}，数量 ${count}`);
     await giftIcon.hover();
     await submitGift(roomId, frame, count);
     // 赠送后 DOM 可能变化，需要重新获取
     return await getAvailableGifts(frame);
   } catch (err) {
-    timeLog(`赠送 ${text} 失败:`, err.message);
+    console.log(`赠送 ${text} 失败:`, err.message);
     return await getAvailableGifts(frame); // 即使失败也要刷新
   }
 }
@@ -112,15 +120,13 @@ async function submitGift(roomId, page, count) {
       // timeLog(`房间 ${roomId}：点击赠送按钮`);
       await page.click(SELECTORS.PRESENT_SUBMIT);
 
-      timeLog(`房间 ${roomId}：赠送成功 ${count} 个`);
-
-      // redis记录用户虎粮
+      // timeLog(`房间 ${roomId}：赠送成功 ${count} 个`);
       await checkInService.setGift(roomId);
     })
     .catch((err) => {
       console.warn(`房间 ${roomId}：等待赠送按钮超时`, err.message);
     });
-  // 等待n秒模拟空闲
+
   await sleep(10000);
 }
 
@@ -154,7 +160,7 @@ async function sendRoomGift(roomId, frame, presentNum) {
     const realCount = await giftIcon.evaluate(
       (btn) => btn.querySelector('.c-count')?.textContent.trim() || '0'
     );
-    timeLog(`查询到'${GIFT_FREE_TEXT}'数量 ${realCount} 个`);
+    timeLog(`查询到 '${GIFT_FREE_TEXT}' 数量 ${realCount} 个`);
 
     const giftCount = Math.min(parseInt(realCount, 10), presentNum);
     availableGifts = await sendGiftAndRefresh(
@@ -187,13 +193,7 @@ async function getTheIframe(page, roomId) {
     .catch((err) => {
       console.warn(`房间 ${roomId}：未找到包裹图标`, err.message);
     });
-  // await page
-  //   .waitForSelector(SELECTORS.ICON_BAG, { timeout: 10000 })
-  //   .catch((err) => {
-  //     console.warn(`房间 ${roomId}：未找到包裹图标`, err.message);
-  //   });
-  // timeLog(`房间 ${roomId}：点击包裹图标`);
-  // await page.click(SELECTORS.ICON_BAG);
+
   await sleep(10000);
   let frame = findFrame(page.mainFrame(), GIFT_URL_STR);
   if (!frame) {
@@ -230,25 +230,25 @@ function findFrame(frame, urlstr) {
  */
 async function debugIframe(iframePage) {
   // 1. 确认 iframe 已加载
-  timeLog('iframe URL:', await iframePage.url());
+  console.log('iframe URL:', await iframePage.url());
 
   // 2. 检查选择器是否存在
   const selectorExists = await iframePage.evaluate((selector) => {
     const el = document.querySelector(selector);
-    timeLog('调试元素:', el); // 浏览器控制台可见
+    console.log('调试元素:', el); // 浏览器控制台可见
     return el !== null;
   }, SELECTORS.PRESENT_BTN);
 
-  timeLog('选择器匹配:', selectorExists);
+  console.log('选择器匹配:', selectorExists);
 
   // 3. 打印 HTML 结构
-  timeLog('iframe HTML:', await iframePage.content());
+  console.log('iframe HTML:', await iframePage.content());
 
   // 4. 尝试简化查询
   const testResults = await iframePage.$$eval('*', (els) =>
     els.map((el) => el.tagName)
   );
-  timeLog('测试查询:', testResults);
+  console.log('测试查询:', testResults);
 }
 
 function dumpFrameTree(frame, indent) {
