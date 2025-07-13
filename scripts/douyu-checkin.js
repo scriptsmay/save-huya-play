@@ -57,10 +57,10 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
  * @param {*} browser
  */
 async function goTaskCenter(browser) {
-  if (config.DOUYU_NOCHECKIN == '1') {
-    // 跳过签到
-    return false;
-  }
+  // if (config.DOUYU_NOCHECKIN == '1') {
+  //   // 跳过签到
+  //   return false;
+  // }
 
   const page = await browser.newPage();
   const URL_TASK = config.URLS.URL_DOUYU_POINT_PAGE;
@@ -83,7 +83,7 @@ async function goTaskCenter(browser) {
           console.log(`未找到元素 ${signSelector}`, err.message);
         });
       if (result) {
-        timeLog('点击签到按钮');
+        // timeLog('点击签到按钮');
         await page.click(signSelector);
         // redis记录一下
         await checkInService.setCheckIn('user', 'douyu');
@@ -124,7 +124,7 @@ async function goGameTask(browser, page) {
   const tasks = await page.$$(config.DOUYU_SELECTORS.POINT_JUMP_BTN);
   if (tasks.length > 0) {
     for (const task of tasks) {
-      timeLog('点击`去试玩`按钮');
+      // timeLog('点击`去试玩`按钮');
       await task.click();
       await sleep(5000);
       // 等待新页面加载
@@ -133,30 +133,29 @@ async function goGameTask(browser, page) {
       const newPage = pages[pages.length - 1];
       // 获取页面标题并打印
       const title = await newPage.title();
-      timeLog(`页面标题： ${title}`);
-      timeLog('等待132s...');
+      timeLog(`页面等待132s... ${title}`);
       // 试玩2分钟
       await sleep(132000);
-
       await newPage.close();
       await sleep(5000);
     }
   }
 
   while (true) {
-    timeLog('刷新页面，等待5s...');
+    // timeLog('刷新页面，等待5s...');
     await page.reload();
     await sleep(5000);
 
     const btn = await page.$(config.DOUYU_SELECTORS.POINT_GET_BTN);
     if (!btn) {
-      timeLog('没有可领取的按钮了');
+      // timeLog('没有可领取的按钮了');
       break;
     }
-    timeLog('点击`领取`按钮');
+    // timeLog('点击`领取`按钮');
     await btn.click();
     await sleep(3000);
   }
+  timeLog('点击`领取`完成');
 }
 
 async function queryPoint(browser) {

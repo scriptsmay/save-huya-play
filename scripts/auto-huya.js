@@ -30,7 +30,7 @@ const browserOptions = {
   try {
     const isLoggedIn = await huyaUserService.userLoginCheck(browser);
     if (!isLoggedIn) {
-      timeLog('虎牙用户未登录');
+      timeLog('虎牙用户未登录!');
       return;
     }
 
@@ -40,10 +40,14 @@ const browserOptions = {
     }
     timeLog(`共需要打卡的虎牙直播间：${totalRoomCount}个`);
 
+    let num = 0;
     for (const roomId of TARGET_ROOM_LIST) {
+      num++;
       const result = await autoCheckInRoom(browser, roomId);
       if (!result) {
-        timeLog('浏览器似乎出现了未响应错误...');
+        timeLog(
+          `房间 ${roomId} 似乎出现了未响应错误...[${num}/${totalRoomCount}]`
+        );
         break;
       }
       await sleep(5000);

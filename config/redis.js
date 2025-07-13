@@ -27,6 +27,7 @@ class RedisClient {
       },
       username: process.env.REDIS_USER || 'default',
       password: process.env.REDIS_PASSWORD,
+      database: parseInt(process.env.REDIS_DB || '0'), // 默认数据库 0
     });
 
     this._setupEventListeners();
