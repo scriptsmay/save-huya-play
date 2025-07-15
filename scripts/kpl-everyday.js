@@ -11,7 +11,8 @@ const {
   getScreenShotPath,
 } = require('./util/index');
 const msgService = require('./util/msgService');
-// KPL官方赛程
+
+const SEND_PIC = false;
 
 // 2025年夏季赛ID
 const leagueId = 20250002;
@@ -31,6 +32,7 @@ const OUTPUT_FILE = `logs/screenshot/${IMAGE_FILENAME}`;
     protocolTimeout: config.protocolTimeout,
   });
   try {
+    await dayMatch(browser);
     await mainTask(browser);
   } catch (error) {
     console.error('执行过程中出错:', error.message);
@@ -62,8 +64,54 @@ async function mainTask(browser) {
   console.log(`表格截图已保存为: ${OUTPUT_FILE}`);
   const url = `http://192.168.31.10:3210/screenshot/${IMAGE_FILENAME}`;
 
+  if (!SEND_PIC) {
+    return;
+  }
   await msgService
     .sendPicture({ url, filePath: getScreenShotPath(IMAGE_FILENAME) })
+    .catch((err) => {
+      console.log(err.message);
+    });
+}
+
+async function dayMatch(browser) {
+  const page = await browser.newPage();
+  // 设置视口大小
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.goto('https://pvp.qq.com/match/kpl/kingproleague/match.html', {
+    waitUntil: 'networkidle2', // 等待网络空闲
+    timeout: 30000, // 30秒超时
+  });
+  console.log('正在截图...');
+  // 积分榜
+  const scoreFileName = `kpl_scoreboard.${getTimestamp()}.png`;
+  const fileElement = await page.waitForSelector('.scoreboard');
+  await fileElement.screenshot({
+    path: `logs/screenshot/${scoreFileName}`,
+    type: 'png',
+  });
+  await msgService
+    .sendPicture({
+      url: `http://192.168.31.10:3210/screenshot/${scoreFileName}`,
+      filePath: getScreenShotPath(scoreFileName),
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+
+  // 赛程 .schedule
+  const scheduleFileName = `kpl_schedule.${getTimestamp()}.png`;
+  const fileElement2 = await page.waitForSelector('.schedule');
+  await fileElement2.screenshot({
+    path: `logs/screenshot/${scheduleFileName}`,
+    type: 'png',
+  });
+
+  await msgService
+    .sendPicture({
+      url: `http://192.168.31.10:3210/screenshot/${scheduleFileName}`,
+      filePath: getScreenShotPath(scheduleFileName),
+    })
     .catch((err) => {
       console.log(err.message);
     });
