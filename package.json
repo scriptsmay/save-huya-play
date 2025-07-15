@@ -7,13 +7,10 @@
     "pm2": "pm2 start ecosystem.config.js",
     "pm2-stop": "pm2 stop ecosystem.config.js",
     "save": "node scripts/save-huya-play.js",
-    "huya": "node scripts/auto-huya.js",
     "huya-checkin": "node scripts/huya-checkin.js",
-    "kpl": "node scripts/huya-kpl.js",
     "badge": "node scripts/huya-badgelist.js && node scripts/douyu-badgelist.js",
-    "douyu": "node scripts/douyu-checkin.js",
+    "douyu-checkin": "node scripts/douyu-checkin.js",
     "kpl-everyday": "node scripts/kpl-everyday.js",
-    "gemini": "node scripts/douyu-live.js",
     "cleanup": "node scripts/cleanup.js"
   },
   "repository": {
