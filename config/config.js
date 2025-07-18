@@ -118,9 +118,13 @@ const config = {
       name: 'KPL归期',
       url: 'https://www.huya.com/video/u/1692032870?tabName=live',
     },
+    {
+      name: 'KPL小雪',
+      url: 'https://www.huya.com/video/u/2374381262?tabName=live',
+    },
   ],
   // 最大抓取页数，一页10条
-  huyaPage: 2,
+  huyaPage: parseInt(envs.HUYA_LIVE_PAGENUM) || 2,
   URLS: {
     URL_HUYA_USER,
     URL_HUYA_LIVE_KPL,
