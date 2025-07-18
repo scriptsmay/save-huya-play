@@ -18,13 +18,13 @@ module.exports = {
     },
 
     // 定时任务
-    {
-      name: 'kpl-everyday',
-      script: './scripts/kpl-everyday.js',
-      cron_restart: '0 9 * * *', // 每天9点运行
-      autorestart: false, // 必须设置为false才能使用cron
-      watch: false,
-    },
+    // {
+    //   name: 'kpl-everyday',
+    //   script: './scripts/kpl-everyday.js',
+    //   cron_restart: '0 9 * * *', // 每天9点运行
+    //   autorestart: false, // 必须设置为false才能使用cron
+    //   watch: false,
+    // },
     // 测试了一下，只有这个任务能正常运行，以下会报错
     // 还是老老实实使用crontab吧
     // {
