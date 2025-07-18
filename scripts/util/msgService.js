@@ -81,7 +81,7 @@ async function sendMessage(title, content, description = '') {
 
 /**
  * 发送图片消息，目前好像只有QQ支持
- * 1. 加入飞书推送
+ * 1. 加入飞书推送 filePath 是飞书推送文件路径
  * @param {*} url
  * @returns
  */

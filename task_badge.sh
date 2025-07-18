@@ -1,5 +1,6 @@
 #!/bin/bash
-# 这个是签到任务和粉丝徽章截图的脚本
+# 这个是粉丝徽章截图的脚本
+# 每天执行1次就行了，每天下午15点执行比较合适
 
 # 设置工作目录为脚本所在目录
 cd "$(dirname "$0")" || exit 1
@@ -42,8 +43,6 @@ run_npm() {
 }
 
 # 执行任务序列
-run_npm huya-checkin
-sleep 5
-run_npm douyu-checkin
+run_npm badge
 
 echo "执行完毕"

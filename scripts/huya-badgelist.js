@@ -13,7 +13,7 @@ const msgService = require('./util/msgService');
 const URL_HUYA_BADGELIST = config.URLS.URL_HUYA_BADGELIST; // 替换为实际URL
 const TABLE_SELECTOR = 'table.table-badge';
 
-const TARGET_FILENAME = `table-screenshot.${getTimestamp()}.png`;
+const TARGET_FILENAME = `huya_badge.${getTimestamp()}.png`;
 const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
 
 (async () => {
@@ -22,7 +22,7 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
     userDataDir: './user_data', // 指定用户数据目录
     headless: 'new', // 使用新的Headless模式
     args: ['--no-sandbox', '--disable-setuid-sandbox'], // 适用于某些Linux环境
-    // protocolTimeout: config.protocolTimeout,
+    protocolTimeout: config.protocolTimeout,
   });
   try {
     const isLoggedIn = await huyaUserService.userLoginCheck(browser);
@@ -35,11 +35,11 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
   } catch (error) {
     console.error('执行过程中出错:', error.message);
   } finally {
+    // 关闭redis,否则会卡住
+    await redisClient.disconnect();
     // 最后打印个时间戳
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
-    // 关闭redis,否则会卡住
-    await redisClient.disconnect();
   }
 })();
 

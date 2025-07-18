@@ -33,11 +33,11 @@ const OUTPUT_FILE = `logs/screenshot/${TARGET_FILENAME}`;
   } catch (error) {
     console.error('执行过程中出错:', error.message);
   } finally {
+    // 关闭redis,否则会卡住
+    await redisClient.disconnect();
     // 最后打印个时间戳
     timeLog('所有任务完成，正在关闭浏览器...');
     await browser.close();
-    // 关闭redis,否则会卡住
-    await redisClient.disconnect();
   }
 })();
 
