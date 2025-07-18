@@ -44,6 +44,7 @@ run_node() {
 
 
 run_node scripts/save-huya-play.js
+run_node scripts/save-douyu-play.js
 run_node scripts/task_0.js
 
 echo "task_0 执行完毕"

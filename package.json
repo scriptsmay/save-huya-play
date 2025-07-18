@@ -6,7 +6,7 @@
     "start": "node app/index.js",
     "pm2": "pm2 start ecosystem.config.js",
     "pm2-stop": "pm2 stop ecosystem.config.js",
-    "save": "node scripts/save-huya-play.js",
+    "save": "node scripts/save-huya-play.js && node scripts/save-douyu-play.js",
     "huya-checkin": "node scripts/huya-checkin.js",
     "badge": "node scripts/huya-badgelist.js && node scripts/douyu-badgelist.js",
     "douyu-checkin": "node scripts/douyu-checkin.js",

@@ -125,6 +125,13 @@ const config = {
   ],
   // 最大抓取页数，一页10条
   huyaPage: parseInt(envs.HUYA_LIVE_PAGENUM) || 2,
+  douyu: [
+    {
+      name: 'KPL花缘',
+      url: 'https://v.douyu.com/wgapi/vod/center/authorShowVideoList?up_id=JPw9Z6nEord5',
+      maxPageNum: 1,
+    },
+  ],
   URLS: {
     URL_HUYA_USER,
     URL_HUYA_LIVE_KPL,
