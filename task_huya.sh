@@ -1,5 +1,5 @@
 #!/bin/bash
-# 执行虎牙视频回放数据的脚本
+# 这个是签到任务和粉丝徽章截图的脚本
 
 # 设置工作目录为脚本所在目录
 cd "$(dirname "$0")" || exit 1
@@ -14,7 +14,7 @@ brew --version
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-logfile="logs/huya-records.$(date +'%Y%m%d').log"
+logfile="logs/task_huya.$(date +'%Y%m%d').log"
 
 # 添加带时间戳的日志函数
 log() {
@@ -30,7 +30,6 @@ run_npm() {
 
   log "开始执行: npm run $script_name"
   timeout --kill-after="$timeout_duration" "$timeout_duration" npm run "$script_name" >>"$logfile" 2>&1
-  # npm run "$script_name" >>"$logfile" 2>&1
   local exit_code=$?
 
   if [ $exit_code -eq 124 ]; then
@@ -43,17 +42,9 @@ run_npm() {
 }
 
 # 执行任务序列
-run_npm save
-sleep 5
-run_npm kpl
-sleep 5
-run_npm huya
-sleep 5
 run_npm huya-checkin
 sleep 5
-run_npm gemini
-sleep 5
-run_npm douyu
+run_npm douyu-checkin
 sleep 5
 run_npm badge
 

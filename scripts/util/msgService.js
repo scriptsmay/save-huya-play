@@ -89,7 +89,9 @@ async function sendPicture({ filePath = '', url = '' }) {
   // console.log(url)
   if (filePath && isInAllowedTime()) {
     const result = await larkClient.sendImage(filePath);
-    console.log('Lark图片消息发送结果:', result);
+    if (result && result.code == 0) {
+      console.log('Lark图片消息发送成功:', result.msg);
+    }
   }
 
   // QQ设置了免打扰
@@ -123,17 +125,13 @@ async function sendQQPic({ filePath = '', url = '' }) {
     if (url) {
       postData.message[0].data.url = url;
     }
-    // 还是不行，只能用url了
-    // if (filePath) {
-    //   postData.message[0].data.file = fs.createReadStream(filePath);
-    // }
-
-    const response = await axios.post(QQ_API, postData);
-    console.log('QQ图片消息发送结果:', response.data);
-    if (response.data.success) {
-      return response.data;
+    const response = await axios.post(QQ_API, postData).then((res) => res.data);
+    if (response && response.retcode == 0) {
+      console.log('QQ图片消息发送成功');
+    } else {
+      console.log('QQ图片消息发送结果:', response.status);
     }
-    return response.data;
+    return response;
   } catch (error) {
     if (error.response) {
       return error.response.data;

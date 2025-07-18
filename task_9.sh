@@ -1,5 +1,5 @@
 #!/bin/bash
-# 定时任务0点运行、执行挂机脚本、执行保存虎牙直播回放地址脚本
+# 定时任务9点运行，执行每日kpl赛程数据、积分榜截图
 
 # 设置工作目录为脚本所在目录
 cd "$(dirname "$0")" || exit 1
@@ -14,7 +14,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-logfile="logs/task_0.$(date +'%Y%m%d').log"
+logfile="logs/task_9.$(date +'%Y%m%d').log"
 
 # 添加带时间戳的日志函数
 log() {
@@ -43,7 +43,6 @@ run_node() {
 }
 
 
-run_node scripts/save-huya-play.js
-run_node scripts/task_0.js
+run_node scripts/kpl-everyday.js
 
-echo "task_0 执行完毕"
+echo "task_9 执行完毕"
