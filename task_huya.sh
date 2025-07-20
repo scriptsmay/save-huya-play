@@ -1,5 +1,5 @@
 #!/bin/bash
-# 这个是签到任务和粉丝徽章截图的脚本
+# 这个是签到、任务的脚本
 
 # 设置工作目录为脚本所在目录
 cd "$(dirname "$0")" || exit 1
@@ -41,9 +41,12 @@ run_npm() {
   fi
 }
 
+start=$(date +%s)
+
 # 执行任务序列
 run_npm huya-checkin
 sleep 5
 run_npm douyu-checkin
 
-echo "执行完毕"
+end=$(date +%s)
+echo "执行完毕，耗时: $((end-start)) 秒"

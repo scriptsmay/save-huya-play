@@ -15,7 +15,7 @@ brew --version
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-logfile="logs/task_huya.$(date +'%Y%m%d').log"
+logfile="logs/task_badge.$(date +'%Y%m%d').log"
 
 # 添加带时间戳的日志函数
 log() {

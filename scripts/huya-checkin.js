@@ -227,6 +227,17 @@ async function matchPredict(browser) {
       await sleep(5000); // 添加一个延迟，防止过快点击
     }
 
+    // const classBtn = '.recevie_btn';
+    while (true) {
+      const buttons = await page.$$('.recevie_btn:not(.disable)');
+      if (buttons.length === 0) {
+        break;
+      }
+      timeLog(`虎牙赛事预言2：找到${buttons.length}个"领取"按钮，点击领取`);
+      await buttons[0].click();
+      await sleep(3000); // 添加一个延迟，防止过快点击
+    }
+
     await page.reload({ waitUntil: 'domcontentloaded' });
     await sleep(10000);
 

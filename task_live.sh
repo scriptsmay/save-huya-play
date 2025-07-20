@@ -58,16 +58,11 @@ run_node() {
   fi
 }
 
-# 执行任务序列
-# run_npm kpl
-# sleep 5
-# run_npm huya
-# sleep 5
-# run_npm gemini
-# sleep 5
+start=$(date +%s)
 
 run_node scripts/huya-kpl.js
 run_node scripts/auto-huya.js
 run_node scripts/douyu-live.js
 
-echo "执行完毕"
+end=$(date +%s)
+echo "执行完毕，耗时: $((end-start)) 秒"
