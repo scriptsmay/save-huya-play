@@ -31,6 +31,15 @@ const URL_DOUYU_LIVE_PAGE = `https://www.douyu.com/${LIVE_ROOM_ID}`;
 // };
 
 (async () => {
+  // 就一个直播间，打卡完成的话就直接跳过这个任务了。
+  const status = await checkInService.hasCheckedIn(LIVE_ROOM_ID, 'douyu');
+  if (status.checked) {
+    timeLog(`房间 ${LIVE_ROOM_ID} 已打卡，跳过执行脚本`);
+    // 关闭redis
+    await redisClient.disconnect();
+    return false;
+  }
+
   // 启动浏览器
   const browser = await puppeteer.launch({
     userDataDir: './user_data', // 指定用户数据目录

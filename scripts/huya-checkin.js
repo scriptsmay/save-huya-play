@@ -85,13 +85,12 @@ async function kplCheckIn(browser) {
  * @param {*} browser
  */
 async function goH5CheckIn(browser) {
-  // const status = await checkInService.hasCheckedIn('user', 'huya');
-  // // console.log(status);
-  // if (status.checked) {
-  //   timeLog(`虎牙已签到，跳过执行`);
-  //   // 跳过签到
-  //   return false;
-  // }
+  const status = await checkInService.hasCheckedIn('user', 'huya');
+  if (status.checked) {
+    timeLog(`虎牙h5任务中心：已签到，跳过执行`);
+    // 跳过签到
+    return false;
+  }
   const page = await browser.newPage();
   const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
   try {
