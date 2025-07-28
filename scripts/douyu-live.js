@@ -96,25 +96,17 @@ async function goMainTask(browser) {
     await page.close();
     await sleep(15000);
 
-    // 检查是否已打卡
-    const status = await checkInService.hasCheckedIn(LIVE_ROOM_ID, 'douyu');
-    // console.log(status);
-    if (status.checked) {
-      timeLog(`房间 ${LIVE_ROOM_ID} 已打卡，跳过执行`);
-    } else {
-      page = await browser.newPage();
-      await page.setViewport({ width: 1280, height: 800 });
+    // 第一次打开可能会有弹窗，关掉页面重开一次
+    page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
 
-      await page.goto(URL_DOUYU_LIVE_PAGE, {
-        waitUntil: 'domcontentloaded',
-        // waitUntil: 'networkidle2',
-        timeout: 30000,
-      });
-      await sleep(10000);
-      await roomCheckIn(page, LIVE_ROOM_ID);
-    }
-    // await roomCheckIn(page, LIVE_ROOM_ID);
-
+    await page.goto(URL_DOUYU_LIVE_PAGE, {
+      waitUntil: 'domcontentloaded',
+      // waitUntil: 'networkidle2',
+      timeout: 30000,
+    });
+    await sleep(10000);
+    await roomCheckIn(page, LIVE_ROOM_ID);
     await sleep(10000);
   } catch (error) {
     console.error(`打开 URL 发生错误:`, error);

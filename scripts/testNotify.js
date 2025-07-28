@@ -1,4 +1,3 @@
-require('module-alias/register');
 const path = require('path');
 
 const msgService = require('./util/msgService');
@@ -9,10 +8,6 @@ const {
 } = require('./util/index');
 
 timeLog('开始推送消息...');
-
-if (process.env.TEST_TEXT) {
-  testText();
-}
 async function testText() {
   return msgService
     .sendMessage('通知', dumpAllMessage())
@@ -33,18 +28,16 @@ function getFilePath(filename) {
 }
 
 async function testPic(filename) {
-  // 找到 table-screenshot.20250610_ 以今日日期的图片
-  // console.log(filename);
-  // const url = `http://192.168.31.10:3210/screenshot/${filename}`;
+  // await msgService
+  //   .sendPicture({ filePath: getFilePath(filename) })
+  //   .then((res) => {
+  //     console.log('成功', res);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   });
 
-  await msgService
-    .sendPicture({ filePath: getFilePath(filename) })
-    .then((res) => {
-      console.log('成功', res);
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+  await testLark(getFilePath(filename));
 }
 
 // 使用示例
@@ -63,3 +56,14 @@ async function testPic(filename) {
     console.log('未找到今日的截图文件');
   }
 })();
+
+const larkClient = require('../config/lark');
+async function testLark(imgFile) {
+  const imgPath = path.resolve(__dirname, imgFile);
+  const imgRes = await larkClient.sendImage(imgPath);
+  console.log('图片消息发送成功:', imgRes);
+}
+
+if (process.env.TEST_TEXT) {
+  testText();
+}

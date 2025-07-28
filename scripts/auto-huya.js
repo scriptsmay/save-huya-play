@@ -24,6 +24,14 @@ const browserOptions = {
 };
 
 (async () => {
+  // 通过redis检查是否已经全部执行过
+  const preResult = await preCheckRoomList(TARGET_ROOM_LIST);
+  if (preResult) {
+    timeLog('所有直播间都完成任务，跳过脚本执行');
+    await redisClient.disconnect();
+    return false;
+  }
+
   // 启动浏览器
   const browser = await puppeteer.launch(browserOptions);
 
@@ -84,6 +92,22 @@ const browserOptions = {
       });
   }
 })();
+
+/**
+ * 检查redis记录中是否所有的直播间都已经完成任务了
+ * @param {*} roomList
+ */
+async function preCheckRoomList(roomList) {
+  let allPass = true;
+  for (const roomId of roomList) {
+    const statusCheck = await checkInService.hasCheckedIn(roomId);
+    const statusGift = await checkInService.hasGift(roomId);
+    if (!statusCheck.checked || !statusGift.checked) {
+      allPass = false;
+    }
+  }
+  return allPass;
+}
 
 /**
  * 执行直播间任务
