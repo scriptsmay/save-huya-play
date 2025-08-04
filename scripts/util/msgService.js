@@ -74,7 +74,9 @@ async function sendMessage(title, content, description = '') {
     if (error.response) {
       return error.response.data;
     } else {
-      throw error;
+      console.log('发送消息失败:', error.message);
+      // throw error;
+      return false;
     }
   }
 }
@@ -136,7 +138,9 @@ async function sendQQPic({ filePath = '', url = '' }) {
     if (error.response) {
       return error.response.data;
     } else {
-      throw error;
+      console.log('发送消息失败:', error.message);
+      // throw error;
+      return false;
     }
   }
 }

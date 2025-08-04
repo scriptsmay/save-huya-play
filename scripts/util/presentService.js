@@ -152,6 +152,7 @@ async function sendRoomGift(roomId, frame, presentNum) {
       GIFT_SUPER_TEXT,
       realCount
     );
+    timeLog(`赠送 '${GIFT_SUPER_TEXT}' 数量 ${realCount} 个`);
   }
 
   // 2. 再送免费礼物
@@ -160,8 +161,6 @@ async function sendRoomGift(roomId, frame, presentNum) {
     const realCount = await giftIcon.evaluate(
       (btn) => btn.querySelector('.c-count')?.textContent.trim() || '0'
     );
-    timeLog(`查询到 '${GIFT_FREE_TEXT}' 数量 ${realCount} 个`);
-
     const giftCount = Math.min(parseInt(realCount, 10), presentNum);
     availableGifts = await sendGiftAndRefresh(
       roomId,
@@ -170,6 +169,7 @@ async function sendRoomGift(roomId, frame, presentNum) {
       GIFT_FREE_TEXT,
       giftCount
     );
+    timeLog(`赠送 '${GIFT_FREE_TEXT}' 数量 ${giftCount} 个`);
 
     const leftCount = realCount - giftCount;
 
