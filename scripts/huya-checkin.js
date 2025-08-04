@@ -151,6 +151,8 @@ async function pcTaskCenter(browser) {
     // timeLog('任务面板已加载');
     await sleep(1000); // 等待1秒防止过快点击
 
+    await handleTryPlay(page, browser);
+
     while (true) {
       let claimButtons = await getElementsByText(
         page,
@@ -183,6 +185,45 @@ async function pcTaskCenter(browser) {
     timeLog('虎牙pc任务：任务结束，关闭页面');
     await page.close();
   }
+}
+
+/**
+ * PC任务中心处理试玩xxx2分钟的奖励
+ */
+async function handleTryPlay(page, browser) {
+  timeLog('虎牙pc任务：开始处理试玩任务...');
+  // const taskList = await page.$$('.task-panel-wrap > ul li');
+  // console.log(taskList.length);
+  const tryPlayButtons = await getElementsByText(
+    page,
+    '.task-panel-wrap div',
+    '去完成'
+  );
+
+  if (tryPlayButtons.length === 0) {
+    timeLog('虎牙pc任务：没有试玩任务');
+    return;
+  }
+  for (const task of tryPlayButtons) {
+    // timeLog('点击`去试玩`按钮');
+    await task.click();
+    await sleep(5000);
+    // 等待新页面加载
+    // 获取所有页面
+    const pages = await browser.pages();
+    const newPage = pages[pages.length - 1];
+    // 获取页面标题并打印
+    const title = await newPage.title();
+    timeLog(`页面等待132s... ${title}`);
+    // 试玩2分钟
+    await sleep(132000);
+    await newPage.close();
+    await sleep(5000);
+  }
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  // timeLog(`虎牙pc任务：找到${tryPlayButtons}`);
 }
 
 /**
