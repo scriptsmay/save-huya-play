@@ -115,7 +115,10 @@ async function goH5CheckIn(browser) {
           await sleep(2000);
           timeLog('h5任务中心：签到完成');
         } else {
-          timeLog('h5任务中心：签到失败，出现安全验证需要手动执行！！');
+          timeLog(
+            'h5任务中心：签到失败，出现安全验证需要手动执行！！ 请访问： ',
+            URL_TASK
+          );
         }
       })
       .catch((err) => {
