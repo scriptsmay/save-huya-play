@@ -12,16 +12,12 @@ const {
 } = require('./util/index');
 const msgService = require('./util/msgService');
 
-const SEND_PIC = false;
+// const SEND_PIC = false;
 
 // 2025年夏季赛ID
 const leagueId = 20250002;
 const todayStr = getTodayDateString('-');
 const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${leagueId}&match_calendar=${todayStr}`;
-
-const TARGET_SELECTOR = '.schedule-r-item.fixed-position';
-const IMAGE_FILENAME = `match-kpl.${getTimestamp()}.png`;
-const OUTPUT_FILE = `logs/screenshot/${IMAGE_FILENAME}`;
 
 (async () => {
   // 启动浏览器
@@ -54,24 +50,7 @@ async function mainTask(browser) {
     waitUntil: 'networkidle2', // 等待网络空闲
     timeout: 30000, // 30秒超时
   });
-  console.log('正在截图...');
-  const fileElement = await page.waitForSelector(TARGET_SELECTOR);
-  await fileElement.screenshot({
-    path: OUTPUT_FILE,
-    type: 'png',
-  });
-
-  console.log(`表格截图已保存为: ${OUTPUT_FILE}`);
-  const url = `http://192.168.31.10:3210/screenshot/${IMAGE_FILENAME}`;
-
-  if (!SEND_PIC) {
-    return;
-  }
-  await msgService
-    .sendPicture({ url, filePath: getScreenShotPath(IMAGE_FILENAME) })
-    .catch((err) => {
-      console.log(err.message);
-    });
+  await screenshot(page, 'fixed-position');
 }
 
 async function dayMatch(browser) {
@@ -82,35 +61,46 @@ async function dayMatch(browser) {
     waitUntil: 'networkidle2', // 等待网络空闲
     timeout: 30000, // 30秒超时
   });
-  console.log('正在截图...');
-  // 积分榜
-  const scoreFileName = `kpl_scoreboard.${getTimestamp()}.png`;
-  const fileElement = await page.waitForSelector('.scoreboard');
-  await fileElement.screenshot({
-    path: `logs/screenshot/${scoreFileName}`,
-    type: 'png',
-  });
-  await msgService
-    .sendPicture({
-      url: `http://192.168.31.10:3210/screenshot/${scoreFileName}`,
-      filePath: getScreenShotPath(scoreFileName),
+
+  // // 积分榜
+  // await screenshot(page, 'scoreboard');
+
+  // // 赛程 .schedule
+  // await screenshot(page, 'schedule');
+
+  // 季后赛
+  await screenshot(page, 'match-flow3');
+}
+
+async function screenshot(page, selectorName) {
+  const imageFileName = `kpl_${selectorName}.${getTimestamp()}.png`;
+  console.log('正在截图...', selectorName);
+  const domElement = await page
+    .waitForSelector(`.${selectorName}`)
+    .catch((err) => {
+      console.log(`没有找到这个DOM元素...${selectorName}`, err.message);
+      return null;
+    });
+  if (!domElement) {
+    return;
+  }
+  const result = await domElement
+    .screenshot({
+      path: `logs/screenshot/${imageFileName}`,
+      type: 'png',
     })
     .catch((err) => {
-      console.log(err.message);
+      console.log(`截图出错了...${selectorName}`, err.message);
+      return null;
     });
-
-  // 赛程 .schedule
-  const scheduleFileName = `kpl_schedule.${getTimestamp()}.png`;
-  const fileElement2 = await page.waitForSelector('.schedule');
-  await fileElement2.screenshot({
-    path: `logs/screenshot/${scheduleFileName}`,
-    type: 'png',
-  });
+  if (!result) {
+    return;
+  }
 
   await msgService
     .sendPicture({
-      url: `http://192.168.31.10:3210/screenshot/${scheduleFileName}`,
-      filePath: getScreenShotPath(scheduleFileName),
+      url: `http://192.168.31.10:3210/screenshot/${imageFileName}`,
+      filePath: getScreenShotPath(imageFileName),
     })
     .catch((err) => {
       console.log(err.message);
