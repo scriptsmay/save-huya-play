@@ -6,6 +6,7 @@ const redisClient = require('../config/redis');
 
 const huyaUserService = require('./util/huyaUserService');
 const presentService = require('./util/presentService');
+const checkInService = require('./util/checkInService');
 
 // 常量定义
 const SELECTOR_BTN_GET = '.hy-mission-btn--get';
@@ -47,16 +48,23 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
  */
 async function startKplTask(browser) {
   const livePage = await openPage(browser, config.URLS.URL_HUYA_LIVE_KPL);
-
   await sleep(10000);
 
-  // 送礼2个虎粮
-  await presentService.room(livePage, 'kpl', 2);
+  if (livePage) {
+    // 送礼2个虎粮
+    const statusGift = await checkInService.hasGift('kpl');
+    if (!statusGift.checked) {
+      await presentService.room(livePage, 'kpl', 2);
+    }
 
-  await sleep(5000);
+    await sleep(5000);
+  }
 
   timeLog('处理直播任务页面...');
   const taskPage = await openPage(browser, config.URLS.URL_HUYA_TASK_KPL);
+  if (!taskPage) {
+    return false;
+  }
 
   // 找到所有 .hy-mission-btn 的元素，文字如果是 "领取" 的元素，点击它
   const buttons = await taskPage.$$(`.hy-mission-btn`);
