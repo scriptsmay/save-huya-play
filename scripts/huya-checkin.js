@@ -85,16 +85,10 @@ async function kplCheckIn(browser) {
  * @param {*} browser
  */
 async function goH5CheckIn(browser) {
-  const status = await checkInService.hasCheckedIn('user', 'huya');
-  if (status.checked) {
-    timeLog(`虎牙h5任务中心：已签到，跳过执行`);
-    // 跳过签到
-    return false;
-  }
   const page = await browser.newPage();
-  const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
+  // const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
   try {
-    await page.goto(URL_TASK, {
+    await page.goto(config.URLS.URL_HUYA_H5_CHECKIN, {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
@@ -102,33 +96,88 @@ async function goH5CheckIn(browser) {
     await page.waitForSelector('.gift-list-wrap').catch((err) => {
       timeLog('h5任务中心：未加载面板', err.message);
     });
-    // 等待并点击“签到”按钮
-    await page
-      .click(SELECTORS.SIGN_IN_BTN)
-      .then(async () => {
-        // 弹出了安全验证
-        const checkResult = await checkSafeVerification(page);
-        console.log(checkResult);
-        if (!checkResult) {
-          // redis记录一下
-          await checkInService.setCheckIn('user', 'huya');
-          await sleep(2000);
-          timeLog('h5任务中心：签到完成');
-        } else {
-          timeLog(
-            'h5任务中心：签到失败，出现安全验证需要手动执行！！ 请访问： ',
-            URL_TASK
-          );
-        }
-      })
-      .catch((err) => {
-        timeLog('h5任务中心：未找到“签到”按钮，可能已经签过', err.message);
-      });
+
+    await checkH5CheckIn(page);
+
+    await checkH5Btns(page);
   } catch (error) {
-    console.error('打开任务中心 URL_TASK 发生错误:', error);
+    console.error(
+      `打开任务中心 ${config.URLS.URL_HUYA_H5_CHECKIN} 发生错误:`,
+      error
+    );
   } finally {
     await page.close();
   }
+}
+
+/**
+ * 每日h5签到检查
+ * @param {*} page
+ * @returns
+ */
+async function checkH5CheckIn(page) {
+  const status = await checkInService.hasCheckedIn('user', 'huya');
+  if (status.checked) {
+    timeLog(`虎牙h5任务中心：已签到，跳过执行`);
+    // 跳过签到
+    return false;
+  }
+  // 判断今天是否领过了
+  const tomorrow = await page.locator('.tomorrow');
+  if (tomorrow) {
+    const headerText = await page.$eval(
+      '.header-tit',
+      (element) => element.innerText
+    );
+    timeLog('虎牙h5任务中心：今日已签到；', headerText);
+    await checkInService.setCheckIn('user', 'huya');
+    // 跳过签到
+    return false;
+  }
+  // 等待并点击“签到”按钮
+  await page
+    .click(SELECTORS.SIGN_IN_BTN)
+    .then(async () => {
+      // 弹出了安全验证
+      const checkResult = await checkSafeVerification(page);
+      console.log(checkResult);
+      if (!checkResult) {
+        // redis记录一下
+        await checkInService.setCheckIn('user', 'huya');
+        await sleep(2000);
+        timeLog('h5任务中心：签到完成');
+      } else {
+        timeLog(
+          'h5任务中心：签到失败，出现安全验证需要手动执行！！ 请访问： ',
+          config.URLS.URL_HUYA_H5_CHECKIN
+        );
+      }
+    })
+    .catch((err) => {
+      timeLog('h5任务中心：未找到“签到”按钮，可能已经签过', err.message);
+    });
+}
+
+/**
+ * h5页面日常金币任务
+ * @param {*} page
+ */
+async function checkH5Btns(page) {
+  let claimButtons = await getElementsByText(
+    page,
+    '.task-wrap-gold .adm-button-primary span',
+    '领取'
+  );
+
+  if (claimButtons.length) {
+    timeLog(
+      `虎牙h5日常任务：找到${claimButtons.length}个"领取"按钮，请访问： ${config.URLS.URL_HUYA_H5_CHECKIN}`
+    );
+  }
+  // for (const btn of claimButtons) {
+  //   await btn.click();
+  //   await sleep(5000);
+  // }
 }
 
 async function checkSafeVerification(page) {
@@ -154,7 +203,11 @@ async function pcTaskCenter(browser) {
     // timeLog('任务面板已加载');
     await sleep(1000); // 等待1秒防止过快点击
 
-    await handleTryPlay(page, browser);
+    const results = await clickTrialTasks(page, browser);
+    if (results.length > 0) {
+      timeLog('虎牙pc任务：等待试玩任务完成中...');
+      await sleep(132000 * results.length);
+    }
 
     while (true) {
       let claimButtons = await getElementsByText(
@@ -164,6 +217,7 @@ async function pcTaskCenter(browser) {
       );
 
       if (claimButtons.length === 0) {
+        console.log('没有找到领取按钮');
         break;
       }
       timeLog(`虎牙pc任务：找到${claimButtons.length}个"领取"按钮，点击领取`);
@@ -190,43 +244,53 @@ async function pcTaskCenter(browser) {
   }
 }
 
-/**
- * PC任务中心处理试玩xxx2分钟的奖励
- */
-async function handleTryPlay(page, browser) {
+async function clickTrialTasks(page) {
   timeLog('虎牙pc任务：开始处理试玩任务...');
-  // const taskList = await page.$$('.task-panel-wrap > ul li');
-  // console.log(taskList.length);
-  const tryPlayButtons = await getElementsByText(
-    page,
-    '.task-panel-wrap div',
-    '去完成'
-  );
+  await page.waitForSelector('.task-panel-wrap ul li');
 
-  if (tryPlayButtons.length === 0) {
-    timeLog('虎牙pc任务：没有试玩任务');
-    return;
-  }
-  for (const task of tryPlayButtons) {
-    // timeLog('点击`去试玩`按钮');
-    await task.click();
-    await sleep(5000);
-    // 等待新页面加载
-    // 获取所有页面
-    const pages = await browser.pages();
-    const newPage = pages[pages.length - 1];
-    // 获取页面标题并打印
-    const title = await newPage.title();
-    timeLog(`页面等待132s... ${title}`);
-    // 试玩2分钟
-    await sleep(132000);
-    await newPage.close();
-    await sleep(5000);
-  }
+  // 直接在页面上下文中执行所有操作
+  const results = await page.evaluate(async () => {
+    const clickedTasks = [];
 
-  await page.reload({ waitUntil: 'domcontentloaded' });
+    // 获取所有任务项
+    const taskItems = document.querySelectorAll('.task-panel-wrap ul li');
 
-  // timeLog(`虎牙pc任务：找到${tryPlayButtons}`);
+    for (const item of taskItems) {
+      try {
+        // 查找包含"试玩"的title
+        const trialTitle = item.querySelector('p[title^="试玩"]');
+
+        if (trialTitle) {
+          // 查找所有div元素
+          const divs = item.querySelectorAll('div');
+          let completeBtn = null;
+
+          for (const div of divs) {
+            if (
+              div.textContent.trim() === '去完成' &&
+              getComputedStyle(div).cursor === 'pointer'
+            ) {
+              completeBtn = div;
+              break;
+            }
+          }
+
+          if (completeBtn) {
+            completeBtn.click();
+            clickedTasks.push(trialTitle.title);
+          }
+        }
+      } catch (error) {
+        console.log('处理任务时出错:', error.message);
+      }
+    }
+
+    return clickedTasks;
+  });
+
+  timeLog(`点击了 ${results.length} 个试玩任务:`, results);
+
+  return results;
 }
 
 /**
