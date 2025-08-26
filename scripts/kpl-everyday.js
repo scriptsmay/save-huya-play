@@ -28,7 +28,7 @@ const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${l
     protocolTimeout: config.protocolTimeout,
   });
   try {
-    await dayMatch(browser);
+    // await dayMatch(browser);
     await mainTask(browser);
   } catch (error) {
     console.error('执行过程中出错:', error.message);
@@ -53,24 +53,24 @@ async function mainTask(browser) {
   await screenshot(page, 'fixed-position');
 }
 
-async function dayMatch(browser) {
-  const page = await browser.newPage();
-  // 设置视口大小
-  await page.setViewport({ width: 1280, height: 800 });
-  await page.goto('https://pvp.qq.com/match/kpl/kingproleague/match.html', {
-    waitUntil: 'networkidle2', // 等待网络空闲
-    timeout: 30000, // 30秒超时
-  });
+// async function dayMatch(browser) {
+//   const page = await browser.newPage();
+//   // 设置视口大小
+//   await page.setViewport({ width: 1280, height: 800 });
+//   await page.goto('https://pvp.qq.com/match/kpl/kingproleague/match.html', {
+//     waitUntil: 'networkidle2', // 等待网络空闲
+//     timeout: 30000, // 30秒超时
+//   });
 
-  // // 积分榜
-  // await screenshot(page, 'scoreboard');
+//   // // 积分榜
+//   // await screenshot(page, 'scoreboard');
 
-  // // 赛程 .schedule
-  // await screenshot(page, 'schedule');
+//   // // 赛程 .schedule
+//   // await screenshot(page, 'schedule');
 
-  // 季后赛
-  await screenshot(page, 'match-flow3');
-}
+//   // // 季后赛
+//   // await screenshot(page, 'match-flow3');
+// }
 
 async function screenshot(page, selectorName) {
   const imageFileName = `kpl_${selectorName}.${getTimestamp()}.png`;
