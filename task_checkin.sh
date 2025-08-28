@@ -17,9 +17,6 @@ start=$(date +%s)
 run_npm huya-checkin
 sleep 5
 run_npm douyu-checkin
-sleep 5
-run_npm badge
-run_node scripts/kpl-everyday.js
 
 end=$(date +%s)
-echo "执行完毕，耗时: $((end-start)) 秒"
+log "执行完毕，耗时: $((end-start)) 秒"

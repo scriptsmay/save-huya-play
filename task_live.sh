@@ -16,4 +16,4 @@ run_node scripts/auto-huya.js
 run_node scripts/douyu-live.js
 
 end=$(date +%s)
-echo "执行完毕，耗时: $((end-start)) 秒"
+log "执行完毕，耗时: $((end-start)) 秒"
