@@ -14,6 +14,9 @@ const msgService = require('./util/msgService');
 
 const SELECTORS = config.HUYA_SELECTORS;
 
+const H5_USER_AGENT =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
+
 (async () => {
   // 启动浏览器
   const browser = await puppeteer.launch({
@@ -87,6 +90,9 @@ async function kplCheckIn(browser) {
 async function goH5CheckIn(browser) {
   const page = await browser.newPage();
   // const URL_TASK = config.URLS.URL_HUYA_H5_CHECKIN;
+  // 设置成移动页面的UA和尺寸
+  await page.setUserAgent(H5_USER_AGENT);
+  await page.setViewport({ width: 375, height: 824 });
   try {
     await page.goto(config.URLS.URL_HUYA_H5_CHECKIN, {
       waitUntil: 'domcontentloaded',
@@ -110,27 +116,41 @@ async function goH5CheckIn(browser) {
   }
 }
 
+// 检查元素是否存在并可见
+const checkDOM = async (page, selector) => {
+  const element = await page.locator(selector);
+
+  if ((await element.count()) > 0 && (await element.isVisible())) {
+    // console.log('元素存在且可见，正在点击...');
+    // await element.click();
+    return true;
+  } else {
+    // console.log('元素不存在或不可见');
+    return false;
+  }
+};
+
 /**
  * 每日h5签到检查
  * @param {*} page
  * @returns
  */
 async function checkH5CheckIn(page) {
-  const status = await checkInService.hasCheckedIn('user', 'huya');
+  const status = await checkInService.hasCheckedIn('h5user', 'huya');
   if (status.checked) {
     timeLog(`虎牙h5任务中心：已签到，跳过执行`);
     // 跳过签到
     return false;
   }
   // 判断今天是否领过了
-  const tomorrow = await page.locator('.tomorrow');
-  if (tomorrow) {
+  const sBtn = await checkDOM(page, SELECTORS.SIGN_IN_BTN);
+  if (!sBtn) {
     const headerText = await page.$eval(
       '.header-tit',
       (element) => element.innerText
     );
     timeLog('虎牙h5任务中心：今日已签到；', headerText);
-    await checkInService.setCheckIn('user', 'huya');
+    await checkInService.setCheckIn('h5user', 'huya');
     // 跳过签到
     return false;
   }
@@ -139,11 +159,11 @@ async function checkH5CheckIn(page) {
     .click(SELECTORS.SIGN_IN_BTN)
     .then(async () => {
       // 弹出了安全验证
-      const checkResult = await checkSafeVerification(page);
+      const checkResult = await checkDOM(page, '.dialog-safe');
       console.log(checkResult);
       if (!checkResult) {
         // redis记录一下
-        await checkInService.setCheckIn('user', 'huya');
+        await checkInService.setCheckIn('h5user', 'huya');
         await sleep(2000);
         timeLog('h5任务中心：签到完成');
       } else {
@@ -171,7 +191,7 @@ async function checkH5Btns(page) {
 
   if (claimButtons.length) {
     timeLog(
-      `虎牙h5日常任务：找到${claimButtons.length}个"领取"按钮，请访问： ${config.URLS.URL_HUYA_H5_CHECKIN}`
+      `虎牙h5日常任务：金币页面，找到${claimButtons.length}个"领取"按钮，请访问： ${config.URLS.URL_HUYA_H5_CHECKIN}`
     );
   }
   // for (const btn of claimButtons) {
@@ -180,17 +200,12 @@ async function checkH5Btns(page) {
   // }
 }
 
-async function checkSafeVerification(page) {
-  const isSafeVerification = await page.locator('.dialog-safe');
-  return isSafeVerification;
-}
-
 /**
  * pc任务中心白嫖积分
  * @param {*} browser
  */
 async function pcTaskCenter(browser) {
-  timeLog('虎牙pc任务：开始执行...');
+  timeLog('虎牙pc任务：开始执行... ', config.URLS.URL_HUYA_TASK_CENTER);
   const page = await browser.newPage();
   try {
     await page.goto(config.URLS.URL_HUYA_TASK_CENTER, {
@@ -208,6 +223,9 @@ async function pcTaskCenter(browser) {
       timeLog('虎牙pc任务：等待试玩任务完成中...');
       await sleep(132000 * results.length);
     }
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await sleep(10000);
 
     while (true) {
       let claimButtons = await getElementsByText(
@@ -355,7 +373,7 @@ async function matchPredict(browser) {
     timeLog(`虎牙赛事预言：预言币余额：${point}`);
   } catch (error) {
     console.error(
-      `虎牙赛事预言：打开任务中心 ${config.URLS.URL_HUYA_TASK_CENTER} 发生错误:`,
+      `虎牙赛事预言：打开任务中心 ${config.URLS.URL_HUYA_MATCH_YUYAN_POINT} 发生错误:`,
       error.message
     );
   } finally {
