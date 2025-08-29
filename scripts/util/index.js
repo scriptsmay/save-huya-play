@@ -197,8 +197,21 @@ const checkDOM = async (page, selector) => {
   }
 };
 
+/**
+ * 模拟点击页面中心
+ * @param {*} page
+ */
+async function clickCenter(page) {
+  const dimensions = await page.evaluate(() => {
+    return {
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight,
+    };
+  });
+  return await page.mouse.click(dimensions.width / 2, dimensions.height / 2);
+}
+
 module.exports = {
-  checkDOM,
   timeLog,
   sleep,
   getTimestamp,
@@ -209,4 +222,6 @@ module.exports = {
   getSecondsUntilMidnight,
   findTodayScreenshots,
   getTodayDateString,
+  checkDOM,
+  clickCenter,
 };

@@ -5,6 +5,7 @@ const {
   sleep,
   getElementsByText,
   dumpAllMessage,
+  clickCenter,
 } = require('./util/index');
 const config = require('../config/config');
 const redisClient = require('../config/redis');
@@ -107,6 +108,7 @@ async function pcTaskCenter(browser) {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await sleep(10000);
 
+    let lastCount = 0;
     while (true) {
       let claimButtons = await getElementsByText(
         page,
@@ -118,6 +120,11 @@ async function pcTaskCenter(browser) {
         console.log('没有找到领取按钮');
         break;
       }
+      if (lastCount === claimButtons.length) {
+        await clickCenter(page);
+        await sleep(3000);
+      }
+      lastCount = claimButtons.length;
       timeLog(`虎牙pc任务：找到${claimButtons.length}个"领取"按钮，点击领取`);
       await claimButtons[0].click();
       await sleep(5000); // 添加一个延迟，防止过快点击
