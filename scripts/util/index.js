@@ -183,7 +183,22 @@ async function findTodayScreenshots() {
   }
 }
 
+// 检查元素是否存在并可见
+const checkDOM = async (page, selector) => {
+  const element = await page.locator(selector);
+
+  if ((await element.count()) > 0 && (await element.isVisible())) {
+    // console.log('元素存在且可见，正在点击...');
+    // await element.click();
+    return true;
+  } else {
+    // console.log('元素不存在或不可见');
+    return false;
+  }
+};
+
 module.exports = {
+  checkDOM,
   timeLog,
   sleep,
   getTimestamp,
