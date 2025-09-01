@@ -27,7 +27,8 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
     }
 
     timeLog('开始执行主线程任务...');
-    await startKplTask(browser);
+    // 实现了多窗口任务同时进行
+    await Promise.all([kplCheckIn(browser), startKplTask(browser)]);
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -96,6 +97,29 @@ async function startKplTask(browser) {
   }
 
   await sleep(5000);
+}
+
+/**
+ * 打开KPL页面停留5分钟
+ */
+async function kplCheckIn(browser) {
+  timeLog('【虎牙KPL】打开页面停留5分钟...');
+  const page = await browser.newPage();
+  try {
+    await page.goto(config.URLS.URL_HUYA_LIVE_KPL, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
+
+    // 获取当前页面的标题
+    const pageTitle = await page.title();
+    timeLog(`【虎牙KPL】页面标题： ${pageTitle}`);
+
+    return await sleep(5 * 60000);
+  } catch (error) {
+    console.error('打开虎牙KPL页面发生错误:', error);
+    return false;
+  }
 }
 
 async function findAvailBtns(page) {
