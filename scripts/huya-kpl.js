@@ -28,7 +28,11 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
 
     timeLog('开始执行主线程任务...');
     // 实现了多窗口任务同时进行
-    await Promise.all([kplCheckIn(browser), startKplTask(browser)]);
+    await Promise.all([kplCheckIn(browser), startKplTask(browser)]).catch(
+      (err) => {
+        console.error('发生错误:', err);
+      }
+    );
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -48,24 +52,13 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
  * @param {*} browser
  */
 async function startKplTask(browser) {
-  const livePage = await openPage(browser, config.URLS.URL_HUYA_LIVE_KPL);
-  await sleep(10000);
-
-  if (livePage) {
-    // 送礼2个虎粮
-    const statusGift = await checkInService.hasGift('kpl');
-    if (!statusGift.checked) {
-      await presentService.room(livePage, 'kpl', 2);
-    }
-
-    await sleep(5000);
-  }
-
   timeLog('处理直播任务页面...');
   const taskPage = await openPage(browser, config.URLS.URL_HUYA_TASK_KPL);
   if (!taskPage) {
     return false;
   }
+
+  await taskPage.setViewport({ width: 568, height: 1024 });
 
   // 找到所有 .hy-mission-btn 的元素，文字如果是 "领取" 的元素，点击它
   const buttons = await taskPage.$$(`.hy-mission-btn`);
@@ -103,7 +96,7 @@ async function startKplTask(browser) {
  * 打开KPL页面停留5分钟
  */
 async function kplCheckIn(browser) {
-  timeLog('【虎牙KPL】打开页面停留5分钟...');
+  timeLog('【虎牙KPL】打开页面停留2分钟...');
   const page = await browser.newPage();
   try {
     await page.goto(config.URLS.URL_HUYA_LIVE_KPL, {
@@ -115,7 +108,17 @@ async function kplCheckIn(browser) {
     const pageTitle = await page.title();
     timeLog(`【虎牙KPL】页面标题： ${pageTitle}`);
 
-    return await sleep(5 * 60000);
+    if (page) {
+      // 送礼2个虎粮
+      const statusGift = await checkInService.hasGift('kpl');
+      if (!statusGift.checked) {
+        await presentService.room(page, 'kpl', 2);
+      }
+
+      await sleep(5000);
+    }
+    await sleep(1 * 60000);
+    return true;
   } catch (error) {
     console.error('打开虎牙KPL页面发生错误:', error);
     return false;
@@ -123,6 +126,11 @@ async function kplCheckIn(browser) {
 }
 
 async function findAvailBtns(page) {
+  const closeBtn = await page.$('.pop-close');
+  if (closeBtn) {
+    await closeBtn.click();
+    await sleep(1000);
+  }
   await page.click('.reward-list-refresh');
   await sleep(1500);
 
