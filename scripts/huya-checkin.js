@@ -86,6 +86,15 @@ async function pcTaskCenter(browser) {
 
     let lastCount = 0;
     while (true) {
+      let doneBtn = await getElementsByText(
+        page,
+        '.hy-button.ghost.xl',
+        '我知道了'
+      );
+      if (doneBtn.length > 0) {
+        doneBtn[0].click();
+        await sleep(1000);
+      }
       let claimButtons = await getElementsByText(
         page,
         '.task-panel-wrap div',
@@ -139,7 +148,9 @@ async function clickTrialTasks(page) {
     for (const item of taskItems) {
       try {
         // 查找包含"试玩"的title
-        const trialTitle = item.querySelector('p[title^="试玩"]');
+        const trialTitle = item.querySelector(
+          'p[title^="试玩"][title*="2分钟"]'
+        );
 
         if (trialTitle) {
           // 查找所有div元素
@@ -169,7 +180,9 @@ async function clickTrialTasks(page) {
     return clickedTasks;
   });
 
-  timeLog(`点击了 ${results.length} 个试玩任务:`, results);
+  if (results.length) {
+    timeLog(`点击了 ${results.length} 个试玩任务:`, results);
+  }
 
   return results;
 }
@@ -178,6 +191,10 @@ async function clickTrialTasks(page) {
  * 虎牙h5 赛事预言自动领取预言币
  */
 async function matchPredict(browser) {
+  if (config.HUYA_MATCH_PREDICT === 'false') {
+    timeLog('虎牙赛事预言：已关闭');
+    return;
+  }
   timeLog('虎牙赛事预言：开始执行...');
   const page = await browser.newPage();
   try {
