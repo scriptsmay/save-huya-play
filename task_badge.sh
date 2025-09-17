@@ -8,8 +8,6 @@ mkdir -p logs/screenshot
 
 source "./task_common.sh"
 
-
-
 logfile="logs/task_badge.$(date +'%Y%m%d').log"
 
 start=$(date +%s)

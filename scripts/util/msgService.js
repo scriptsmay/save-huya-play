@@ -40,18 +40,23 @@ sendMessage('标题', '', '**内容**').then(
  * @returns 
  */
 async function sendMessage(title, content, description = '') {
+  const sendContent = `${title}\n\n${content}\nfrom：${siteUrl}`;
+  await sendQQMsg({
+    text: sendContent,
+  });
   if (!MESSAGE_PUSHER_SERVER || !MESSAGE_PUSHER_USERNAME) {
     return Promise.resolve({
       success: false,
       message: '未配置消息推送服务',
     });
   }
+
   try {
     const channelName = '飞书-webhook';
     const postData = JSON.stringify({
       title: title,
       desp: description,
-      content: `${title}\n\n${content}\nfrom：${siteUrl}`,
+      content: sendContent,
       token: MESSAGE_PUSHER_TOKEN,
       // 通道名称 ，不填默认是 飞书-webhook
       channel: channelName,
@@ -97,13 +102,18 @@ async function sendPicture({ filePath = '', url = '' }) {
   }
 
   // QQ设置了免打扰
-  await sendQQPic({ url, filePath });
+  await sendQQMsg({ url });
 }
 
-async function sendQQPic({ filePath = '', url = '' }) {
+/**
+ * QQ消息推送
+ * @param {*} { url = '图片网址', text = '文本内容' }
+ * @returns
+ */
+async function sendQQMsg({ url = '', text = '' }) {
   const QQ_API = 'http://192.168.31.10:3000/send_group_msg';
-  if (!url) {
-    console.log('发送图片失败，缺少参数 url', url, filePath);
+  if (!url && !text) {
+    console.log('缺少参数 url / text', url);
     return false;
   }
   try {
@@ -126,6 +136,12 @@ async function sendQQPic({ filePath = '', url = '' }) {
     };
     if (url) {
       postData.message[0].data.url = url;
+    }
+    if (text) {
+      postData.message.unshift({
+        type: 'text',
+        data: { text },
+      });
     }
     const response = await axios.post(QQ_API, postData).then((res) => res.data);
     if (response && response.retcode == 0) {

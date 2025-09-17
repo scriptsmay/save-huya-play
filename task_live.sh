@@ -8,7 +8,6 @@ source "./task_common.sh"
 
 logfile="logs/task_live.$(date +'%Y%m%d').log"
 
-
 start=$(date +%s)
 
 run_node scripts/huya-kpl.js
