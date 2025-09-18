@@ -119,16 +119,11 @@ async function sendQQMsg({ url = '', text = '' }) {
   try {
     const postData = {
       group_id: parseInt(MESSAGE_PUSHER_QQ_GROUP_ID),
-      message: [
-        {
-          type: 'text',
-          data: { text: `来自：${siteUrl}` },
-        },
-      ],
+      message: [],
     };
     if (url) {
       // postData.message[0].data.url = url;
-      postData.message.unshift({
+      postData.message.push({
         type: 'image',
         data: {
           url,
@@ -139,7 +134,7 @@ async function sendQQMsg({ url = '', text = '' }) {
       });
     }
     if (text) {
-      postData.message.unshift({
+      postData.message.push({
         type: 'text',
         data: { text },
       });
