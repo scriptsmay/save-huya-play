@@ -121,21 +121,22 @@ async function sendQQMsg({ url = '', text = '' }) {
       group_id: parseInt(MESSAGE_PUSHER_QQ_GROUP_ID),
       message: [
         {
-          type: 'image',
-          data: {
-            // file: imgBase64.dataURI, // 图片文件本地路径
-            // "url": "https://xxx",   // 图片URL
-            // "md5": "3F7D797BE1AF0A" // 图片md5 (大写)
-          },
-        },
-        {
           type: 'text',
           data: { text: `来自：${siteUrl}` },
         },
       ],
     };
     if (url) {
-      postData.message[0].data.url = url;
+      // postData.message[0].data.url = url;
+      postData.message.unshift({
+        type: 'image',
+        data: {
+          url,
+          // file: imgBase64.dataURI, // 图片文件本地路径
+          // "url": "https://xxx",   // 图片URL
+          // "md5": "3F7D797BE1AF0A" // 图片md5 (大写)
+        },
+      });
     }
     if (text) {
       postData.message.unshift({
@@ -145,9 +146,9 @@ async function sendQQMsg({ url = '', text = '' }) {
     }
     const response = await axios.post(QQ_API, postData).then((res) => res.data);
     if (response && response.retcode == 0) {
-      console.log('QQ图片消息发送成功');
+      console.log('QQ消息发送成功');
     } else {
-      console.log('QQ图片消息发送结果:', response.status);
+      console.log('QQ消息发送失败，结果:', response);
     }
     return response;
   } catch (error) {
