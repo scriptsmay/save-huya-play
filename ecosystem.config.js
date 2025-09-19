@@ -15,6 +15,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
       },
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
     },
 
     // 定时任务
