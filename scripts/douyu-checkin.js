@@ -57,14 +57,10 @@ const signSelector = '.Sign-module__signBtn1-iMOTD';
  * @param {*} browser
  */
 async function goTaskCenter(browser) {
-  // if (config.DOUYU_NOCHECKIN == '1') {
-  //   // 跳过签到
-  //   return false;
-  // }
-
   const page = await browser.newPage();
   const URL_TASK = config.URLS.URL_DOUYU_POINT_PAGE;
   try {
+    await page.setViewport({ width: 568, height: 1024 });
     await page.goto(URL_TASK, {
       // waitUntil: 'domcontentloaded',
       waitUntil: 'networkidle2',
@@ -109,53 +105,18 @@ async function goTaskCenter(browser) {
     await goScreenShot(page);
   }
 
-  await goGameTask(browser, page);
+  // await goGameTask(browser, page);
+  const results = await clickTrialTasks(page);
+  if (results.length > 0) {
+    timeLog('斗鱼任务：等待试玩任务完成中...');
+    await sleep(132000);
+  }
   await sleep(5000);
 
   await page.close();
 
   // 查询当前积分
   await queryPoint(browser);
-}
-
-async function goGameTask(browser, page) {
-  timeLog('开始执行`做任务领积分`游戏任务...');
-  await sleep(5000);
-  const tasks = await page.$$(config.DOUYU_SELECTORS.POINT_JUMP_BTN);
-  if (tasks.length > 0) {
-    for (const task of tasks) {
-      // timeLog('点击`去试玩`按钮');
-      await task.click();
-      await sleep(5000);
-      // 等待新页面加载
-      // 获取所有页面
-      const pages = await browser.pages();
-      const newPage = pages[pages.length - 1];
-      // 获取页面标题并打印
-      const title = await newPage.title();
-      timeLog(`页面等待132s... ${title}`);
-      // 试玩2分钟
-      await sleep(132000);
-      await newPage.close();
-      await sleep(5000);
-    }
-  }
-
-  while (true) {
-    // timeLog('刷新页面，等待5s...');
-    await page.reload();
-    await sleep(5000);
-
-    const btn = await page.$(config.DOUYU_SELECTORS.POINT_GET_BTN);
-    if (!btn) {
-      // timeLog('没有可领取的按钮了');
-      break;
-    }
-    // timeLog('点击`领取`按钮');
-    await btn.click();
-    await sleep(3000);
-  }
-  timeLog('点击`领取`完成');
 }
 
 async function queryPoint(browser) {
@@ -179,6 +140,52 @@ async function queryPoint(browser) {
   } finally {
     await page.close();
   }
+}
+
+async function clickTrialTasks(page) {
+  timeLog('斗鱼积分任务：开始执行`做任务领积分`游戏任务...');
+  await page.waitForSelector('div[class*="Task-module__taskContent"]');
+
+  // 直接在页面上下文中执行所有操作
+  const results = await page.evaluate(async () => {
+    const regex = /^试玩(?=.*2分钟)$/;
+    const clickedTasks = [];
+
+    // 获取所有任务项
+    const taskItems = document.querySelectorAll(
+      'div[class*="Task-module__taskItem"]'
+    );
+
+    for (const item of taskItems) {
+      try {
+        // 查找包含"试玩"的title
+        const trialTitle = item.querySelector(
+          'div[class*="taskName"]'
+        )?.innerHTML;
+
+        if (trialTitle && regex.test(trialTitle)) {
+          // 查找所有div元素
+          let completeBtn = item.querySelector(
+            'div[class*="taskBtnUnfinished"]'
+          );
+          if (completeBtn) {
+            completeBtn.click();
+            clickedTasks.push(trialTitle);
+          }
+        }
+      } catch (error) {
+        console.log('处理任务时出错:', error.message);
+      }
+    }
+
+    return clickedTasks;
+  });
+
+  if (results.length) {
+    timeLog(`点击了 ${results.length} 个试玩任务:`, results);
+  }
+
+  return results;
 }
 
 async function goScreenShot(page) {
