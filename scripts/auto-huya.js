@@ -157,6 +157,18 @@ async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
       if (!statusCheck.checked) {
         await roomCheckIn(roomPage, roomId);
       }
+
+      if (!statusGift.checked) {
+        await presentService.room(roomPage, roomId, hasGiftNum);
+      } else {
+        const num = await redisClient.get('huya:giftNum');
+        if (num == 0) {
+          timeLog(`房间 ${roomId} 已打卡，且没有剩余礼物，跳出循环`);
+          checkResult = true;
+          return;
+        }
+      }
+
       await presentService.room(roomPage, roomId, hasGiftNum);
       checkResult = true;
     }
