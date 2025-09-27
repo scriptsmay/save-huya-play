@@ -14,10 +14,13 @@ const msgService = require('./util/msgService');
 
 // const SEND_PIC = false;
 
-// 2025年夏季赛ID
-const leagueId = 20250002;
+// 2025年总
+const leagueId = 20250003;
+const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${leagueId}`;
 const todayStr = getTodayDateString('-');
-const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${leagueId}&match_calendar=${todayStr}`;
+// const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${leagueId}&match_calendar=${todayStr}`;
+
+console.log(todayStr);
 
 (async () => {
   // 启动浏览器
