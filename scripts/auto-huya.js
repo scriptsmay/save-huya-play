@@ -60,14 +60,6 @@ const browserOptions = {
       }
       await sleep(5000);
     }
-
-    // 剩余礼物全送给第一个直播间
-    // const num = await redisClient.get('huya:giftNum');
-    // if (num > 0) {
-    //   const lastPage = await browser.newPage();
-    //   await autoCheckInRoom(lastPage, TARGET_ROOM_LIST[0], num);
-    //   await lastPage.close();
-    // }
   } catch (error) {
     console.error('发生错误:', error.message);
   } finally {
@@ -95,14 +87,15 @@ const browserOptions = {
 
 /**
  * 检查redis记录中是否所有的直播间都已经完成任务了
+ * 虎粮不够送了，改成判断打过卡就不重复执行任务
  * @param {*} roomList
  */
 async function preCheckRoomList(roomList) {
   let allPass = true;
   for (const roomId of roomList) {
     const statusCheck = await checkInService.hasCheckedIn(roomId);
-    const statusGift = await checkInService.hasGift(roomId);
-    if (!statusCheck.checked || !statusGift.checked) {
+    // const statusGift = await checkInService.hasGift(roomId);
+    if (!statusCheck.checked) {
       allPass = false;
     }
   }
