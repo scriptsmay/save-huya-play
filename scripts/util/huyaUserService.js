@@ -15,10 +15,14 @@ async function userLoginCheck(browser) {
     const page = await browser.newPage();
 
     // 打开目标页面
-    await page.goto(config.URLS.URL_HUYA_USER, {
-      waitUntil: 'domcontentloaded',
-      timeout: 10000,
-    });
+    await page
+      .goto(config.URLS.URL_HUYA_USER, {
+        waitUntil: 'domcontentloaded',
+        timeout: 10000,
+      })
+      .catch((err) => {
+        console.error('打开页面失败:', err.message);
+      });
 
     const username = await checkLoginStatus(page);
     if (!username) {

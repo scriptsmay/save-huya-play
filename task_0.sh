@@ -14,5 +14,6 @@ logfile="logs/task_0.$(date +'%Y%m%d').log"
 run_node scripts/save-huya-play.js
 run_node scripts/save-douyu-play.js
 run_node scripts/task_0.js
+run_node scripts/db-cleanup.js
 
 log "task_0 执行完毕"
