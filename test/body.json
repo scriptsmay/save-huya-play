@@ -1,0 +1,7 @@
+{
+  "title": "Uptime Kuma 通知{% if monitorJSON %} - {{ monitorJSON['name'] }}{% endif %}",
+  "desp": "",
+  "content": "{{ msg }}",
+  "token": "362F596E30DDC27F500B6168C7F9AAEA",
+  "channel": "飞书-测试应用"
+}
