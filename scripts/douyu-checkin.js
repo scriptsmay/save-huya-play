@@ -106,7 +106,7 @@ async function goTaskCenter(browser) {
   }
 
   // await goGameTask(browser, page);
-  const results = await clickTrialTasks(page);
+  const results = await clickGameTasks(page);
   if (results.length > 0) {
     timeLog('斗鱼任务：等待试玩任务完成中...');
     await sleep(132000);
@@ -142,50 +142,84 @@ async function queryPoint(browser) {
   }
 }
 
-async function clickTrialTasks(page) {
+async function clickGameTasks(page) {
   timeLog('斗鱼积分任务：开始执行`做任务领积分`游戏任务...');
   await page.waitForSelector('div[class*="Task-module__taskContent"]');
 
   // 直接在页面上下文中执行所有操作
-  const results = await page.evaluate(async () => {
-    const regex = /^试玩(?=.*2分钟)$/;
-    const clickedTasks = [];
-
-    // 获取所有任务项
-    const taskItems = document.querySelectorAll(
-      'div[class*="Task-module__taskItem"]'
-    );
-
-    for (const item of taskItems) {
-      try {
-        // 查找包含"试玩"的title
-        const trialTitle = item.querySelector(
-          'div[class*="taskName"]'
-        )?.innerHTML;
-
-        if (trialTitle && regex.test(trialTitle)) {
-          // 查找所有div元素
-          let completeBtn = item.querySelector(
-            'div[class*="taskBtnUnfinished"]'
-          );
-          if (completeBtn) {
-            completeBtn.click();
-            clickedTasks.push(trialTitle);
-          }
-        }
-      } catch (error) {
-        console.log('处理任务时出错:', error.message);
-      }
-    }
-
-    return clickedTasks;
-  });
+  const results = await page.evaluate(getClickTrialTasks);
 
   if (results.length) {
     timeLog(`点击了 ${results.length} 个试玩任务:`, results);
+  } else {
+    timeLog('未找到需要点击的试玩任务');
   }
 
   return results;
+}
+
+async function getClickTrialTasks() {
+  const clickedTasks = [];
+  const taskItems = document.querySelectorAll(
+    'div[class*="Task-module__taskItem"]'
+  );
+
+  console.log(`找到 ${taskItems.length} 个任务项`);
+
+  for (const [index, item] of taskItems.entries()) {
+    try {
+      console.log(`处理第 ${index + 1} 个任务项`);
+
+      // 使用 textContent 获取文本
+      const taskNameElement = item.querySelector('div[class*="taskName"]');
+      const trialTitle = taskNameElement?.textContent?.trim();
+
+      console.log('任务标题:', trialTitle);
+
+      // 更灵活的条件判断
+      if (
+        trialTitle &&
+        trialTitle.includes('试玩') &&
+        trialTitle.includes('2分钟')
+      ) {
+        console.log('✓ 匹配到试玩2分钟任务');
+
+        // 多种按钮选择器
+        const buttonSelectors = [
+          'div[class*="taskBtnUnfinished"]',
+          'div[class*="unfinished"]',
+          'button[class*="unfinished"]',
+          'div[class*="taskBtn"]',
+          'button',
+        ];
+
+        let completeBtn = null;
+        for (const selector of buttonSelectors) {
+          completeBtn = item.querySelector(selector);
+          if (completeBtn) {
+            console.log('使用选择器找到按钮:', selector);
+            break;
+          }
+        }
+
+        if (completeBtn) {
+          completeBtn.click();
+          clickedTasks.push(trialTitle);
+          console.log('✓ 成功点击任务:', trialTitle);
+
+          // 添加短暂延迟，避免点击过快
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } else {
+          console.log('❌ 未找到可点击的按钮');
+        }
+      }
+    } catch (error) {
+      console.log('处理任务时出错:', error);
+    }
+  }
+
+  console.log('点击的任务数量:', clickedTasks.length);
+  return clickedTasks;
 }
 
 async function goScreenShot(page) {

@@ -49,8 +49,9 @@ const HUYA_SELECTORS = {
 };
 
 // 斗鱼页面常量
-// 积分页面
-const URL_DOUYU_POINT_PAGE = 'https://www.douyu.com/pages/ord-task-center';
+// 积分页面： https://www.douyu.com/pages/ord-task-center?clientType=web&panelSource=1&rid=36252
+const URL_DOUYU_POINT_PAGE =
+  'https://www.douyu.com/pages/ord-task-center?clientType=web&panelSource=1&rid=36252';
 // 个人中心
 const URL_DOUYU_USER = 'https://www.douyu.com/member/cp';
 const DOUYU_SELECTORS = {
