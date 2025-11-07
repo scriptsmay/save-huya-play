@@ -5,6 +5,7 @@ const {
   timeLog,
   dumpAllMessage,
   findTodayScreenshots,
+  getTodayDateString,
 } = require('./util/index');
 
 timeLog('开始推送消息...');
@@ -27,17 +28,26 @@ function getFilePath(filename) {
   return path.join(__dirname, '../logs/screenshot/', filename);
 }
 
-async function testPic(filename) {
-  // await msgService
-  //   .sendPicture({ filePath: getFilePath(filename) })
-  //   .then((res) => {
-  //     console.log('成功', res);
-  //   })
-  //   .catch((err) => {
-  //     console.log(err.message);
-  //   });
+async function testGotifyPic(filename) {
+  await msgService
+    .sendGotify({
+      filePath: getFilePath(filename),
+      title: '今日截图' + getTodayDateString('-'),
+      content: '截图内容',
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+}
 
-  await testLark(getFilePath(filename));
+async function testPicSender(filename) {
+  await msgService
+    .sendPicture({
+      filePath: getFilePath(filename),
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 }
 
 // 使用示例
@@ -51,7 +61,11 @@ async function testPic(filename) {
       );
     });
 
-    await testPic(todayScreenshots[0].name);
+    await testGotifyPic(todayScreenshots[0].name);
+
+    if (process.env.TEST_LARK) {
+      await testPicSender(todayScreenshots[0].name);
+    }
   } else {
     console.log('未找到今日的截图文件');
   }
@@ -62,6 +76,9 @@ async function testLark(imgFile) {
   const imgPath = path.resolve(__dirname, imgFile);
   const imgRes = await larkClient.sendImage(imgPath);
   console.log('图片消息发送成功:', imgRes);
+}
+if (process.env.TEST_LARK) {
+  testLark();
 }
 
 if (process.env.TEST_TEXT) {

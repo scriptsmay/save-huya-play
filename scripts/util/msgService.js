@@ -1,18 +1,19 @@
-require('module-alias/register');
-
+const fs = require('fs');
 const axios = require('axios');
 const {
   siteUrl,
   MESSAGE_PUSHER_SERVER,
   MESSAGE_PUSHER_USERNAME,
   MESSAGE_PUSHER_TOKEN,
+  MESSAGE_PUSHER_QQ_API,
   MESSAGE_PUSHER_QQ_GROUP_ID = 1034923436,
-} = require('@config');
+  MESSAGE_GOTIFY_SERVER,
+  MESSAGE_GOTIFY_TOKEN,
+} = require('../../config/config');
 
 const { isInAllowedTime } = require('./index');
 
-// const fs = require('fs');
-const larkClient = require('@/config/lark');
+const larkClient = require('../../config/lark');
 
 // 一个小群 881976357
 // 消息发布 1034923436
@@ -43,6 +44,10 @@ async function sendMessage(title, content, description = '') {
   const sendContent = `${title}\n\n${content}\nfrom：${siteUrl}`;
   await sendQQMsg({
     text: sendContent,
+  });
+  await sendGotify({
+    title,
+    content,
   });
   if (!MESSAGE_PUSHER_SERVER || !MESSAGE_PUSHER_USERNAME) {
     return Promise.resolve({
@@ -103,6 +108,12 @@ async function sendPicture({ filePath = '', url = '' }) {
 
   // QQ设置了免打扰
   await sendQQMsg({ url });
+
+  // await sendGotify({
+  //   filePath,
+  //   title: '图片消息',
+  //   content: '图片消息',
+  // });
 }
 
 /**
@@ -111,7 +122,13 @@ async function sendPicture({ filePath = '', url = '' }) {
  * @returns
  */
 async function sendQQMsg({ url = '', text = '' }) {
-  const QQ_API = 'http://192.168.31.10:3000/send_group_msg';
+  if (!MESSAGE_PUSHER_QQ_API) {
+    return Promise.resolve({
+      success: false,
+      message: '未配置QQ消息推送服务',
+    });
+  }
+  const QQ_API = `${MESSAGE_PUSHER_QQ_API}/send_group_msg`;
   if (!url && !text) {
     console.log('缺少参数 url / text', url);
     return false;
@@ -122,14 +139,10 @@ async function sendQQMsg({ url = '', text = '' }) {
       message: [],
     };
     if (url) {
-      // postData.message[0].data.url = url;
       postData.message.push({
         type: 'image',
         data: {
           url,
-          // file: imgBase64.dataURI, // 图片文件本地路径
-          // "url": "https://xxx",   // 图片URL
-          // "md5": "3F7D797BE1AF0A" // 图片md5 (大写)
         },
       });
     }
@@ -157,4 +170,52 @@ async function sendQQMsg({ url = '', text = '' }) {
   }
 }
 
-module.exports = { sendMessage, sendPicture };
+/**
+ * Gotify消息推送
+ * @param {*} param0
+ * @returns
+ */
+async function sendGotify({
+  filePath = '',
+  title = '图片通知',
+  content = '内容',
+}) {
+  const gotifyUrl = `${MESSAGE_GOTIFY_SERVER}/message`;
+  const appToken = MESSAGE_GOTIFY_TOKEN;
+
+  try {
+    const sendJson = {
+      message: content,
+      title: title,
+      priority: 5, // 优先级：0-10，数字越大优先级越高
+      extras: {
+        'client::display': {
+          contentType: 'text/markdown', // 可选：支持 Markdown
+        },
+      },
+    };
+    if (filePath) {
+      const imageBuffer = fs.readFileSync(filePath);
+      const base64Image = imageBuffer.toString('base64');
+      const imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
+      sendJson.message += `\n![图片](${imageDataUrl})`;
+    }
+    // console.log('发送Gotify消息:', sendJson);
+    const response = await axios.post(gotifyUrl, sendJson, {
+      params: {
+        token: appToken,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('通知发送成功:', response.status);
+    return response.data;
+  } catch (error) {
+    console.error('发送通知失败:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
+module.exports = { sendMessage, sendGotify, sendPicture };
