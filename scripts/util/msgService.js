@@ -210,10 +210,13 @@ async function sendGotify({
       },
     });
 
-    console.log('通知发送成功:', response.status);
+    console.log('Gotify 通知发送成功:', response.status);
     return response.data;
   } catch (error) {
-    console.error('发送通知失败:', error.response?.data || error.message);
+    console.error(
+      'Gotify 发送通知失败:',
+      error.response?.data || error.message
+    );
     throw error;
   }
 }

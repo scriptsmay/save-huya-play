@@ -51,7 +51,7 @@ async function testPicSender(filename) {
 }
 
 // 使用示例
-(async () => {
+async function testTodayScreenshots() {
   const todayScreenshots = await findTodayScreenshots();
   if (todayScreenshots.length > 0) {
     console.log(`找到 ${todayScreenshots.length} 个今日截图:`);
@@ -69,18 +69,22 @@ async function testPicSender(filename) {
   } else {
     console.log('未找到今日的截图文件');
   }
-})();
-
-const larkClient = require('../config/lark');
-async function testLark(imgFile) {
-  const imgPath = path.resolve(__dirname, imgFile);
-  const imgRes = await larkClient.sendImage(imgPath);
-  console.log('图片消息发送成功:', imgRes);
 }
+
 if (process.env.TEST_LARK) {
+  const larkClient = require('../config/lark');
+  async function testLark(imgFile) {
+    const imgPath = path.resolve(__dirname, imgFile);
+    const imgRes = await larkClient.sendImage(imgPath);
+    console.log('图片消息发送成功:', imgRes);
+  }
   testLark();
 }
 
 if (process.env.TEST_TEXT) {
   testText();
+}
+
+if (process.env.TEST_PIC) {
+  testTodayScreenshots();
 }
