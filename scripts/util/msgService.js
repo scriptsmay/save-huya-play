@@ -179,6 +179,7 @@ async function sendGotify({
   filePath = '',
   title = '图片通知',
   content = '内容',
+  markdown = false,
 }) {
   const gotifyUrl = `${MESSAGE_GOTIFY_SERVER}/message`;
   const appToken = MESSAGE_GOTIFY_TOKEN;
@@ -188,12 +189,13 @@ async function sendGotify({
       message: content,
       title: title,
       priority: 5, // 优先级：0-10，数字越大优先级越高
-      extras: {
-        'client::display': {
-          contentType: 'text/markdown', // 可选：支持 Markdown
-        },
-      },
+      extras: {},
     };
+    // 支持 Markdown
+    // 不用markdown的时候 \n 换行符才可用
+    if (markdown) {
+      sendJson.extras['client::display']['contentType'] = 'text/markdown';
+    }
     if (filePath) {
       const imageBuffer = fs.readFileSync(filePath);
       const base64Image = imageBuffer.toString('base64');

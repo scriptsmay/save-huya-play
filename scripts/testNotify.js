@@ -88,3 +88,18 @@ if (process.env.TEST_TEXT) {
 if (process.env.TEST_PIC) {
   testTodayScreenshots();
 }
+
+async function testGotifyMsg() {
+  await msgService
+    .sendGotify({
+      title: '测试消息通知标题' + getTodayDateString('-'),
+      content: '消息内容\n换行1\n换行2',
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+}
+
+if (process.env.TEST_GOTIFY) {
+  testGotifyMsg();
+}
