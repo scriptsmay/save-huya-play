@@ -1,0 +1,35 @@
+.wallpaper-form {
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.wallpaper-item {
+  background-color: #f9f9f9;
+}
+
+.wallpaper-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  /* border-radius: 4px; */
+}
+
+.wallpaper-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.wallpaper-url {
+  font-size: 0.9em;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+
+.wallpaper-meta {
+  font-size: 0.8em;
+  color: #999;
+}
+
+.delete-btn {
+  margin-top: 10px;
+}

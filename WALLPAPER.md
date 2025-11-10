@@ -1,44 +1,6 @@
-# save-huya-play
+# 壁纸管理功能说明
 
-## Dev
-
-```
-# 配置 .env 文件
-cp .env.example .env
-
-# 安装依赖
-npm i
-```
-
-## Run Database
-
-配置 `config/config.js` 中的指定页面
-
-```
-npm test
-```
-
-## Run Server
-
-```
-npm start
-```
-
-Visit: http://localhost:3210
-
-## PM2 Run
-
-```sh
-npm run pm2
-# or
-pm2 start ecosystem.config.js
-```
-
-## 壁纸管理功能
-
-新增壁纸管理功能，可以添加和查看壁纸图片 URL。
-
-### 数据库设置
+## 数据库设置
 
 1. 创建名为 `wallpaper` 的数据库
 2. 执行 `config/wallpaper.sql` 中的 SQL 语句创建表结构
@@ -56,7 +18,7 @@ CREATE TABLE wallpapers (
 CREATE INDEX idx_wallpapers_url ON wallpapers(url);
 ```
 
-### 环境变量配置
+## 环境变量配置
 
 在 `.env` 文件中配置数据库连接信息：
 
@@ -71,28 +33,9 @@ WALLPAPER_DB_PORT=5432
 
 如果未设置壁纸数据库的专门配置，系统会使用主数据库的配置。
 
-### 功能使用
+## 功能使用
 
 1. 启动应用后，访问 `/wallpapers` 路径
 2. 在输入框中输入壁纸的 URL 地址并提交
 3. 壁纸会显示在下方列表中
 4. 可以删除不需要的壁纸
-
-其他命令：
-
-```sh
-# 停止配置文件中的所有进程
-pm2 stop ecosystem.config.js
-
-# 完全删除配置文件相关的所有进程
-pm2 delete ecosystem.config.js
-
-# 先查看所有运行中的应用
-pm2 list
-
-# 然后按配置文件中的应用名称停止
-pm2 stop app1 app2 app3
-
-# 或者删除应用
-pm2 delete app1 app2 app3
-```

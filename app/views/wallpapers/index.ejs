@@ -1,0 +1,100 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="wallpaper-form">
+      <h2 class="mb-4">添加壁纸</h2>
+      <form action="/wallpapers/add" method="POST">
+        <div class="mb-3">
+          <label for="url" class="form-label"
+            >壁纸URL（参考：<a
+              target="_blank"
+              href="https://github.com/scriptsmay/Bing-Wallpaper-Action"
+              >Bing-Wallpaper-Action</a
+            >）</label
+          >
+          <input
+            type="url"
+            class="form-control"
+            id="url"
+            name="url"
+            placeholder="https://example.com/wallpaper.jpg"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="title" class="form-label">标题（可选）</label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            name="title"
+            placeholder="壁纸标题"
+          />
+        </div>
+        <div class="text-left">
+          <button type="submit" class="btn btn-primary">添加壁纸</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <h2 class="mb-4">壁纸接口</h2>
+    <ul>
+      <li>示例：</li>
+      <li>
+        <a target="_blank" href="/wallpapers/image">/wallpapers/image</a>
+      </li>
+      <li>
+        <a target="_blank" href="/wallpapers/image?id=1"
+          >/wallpapers/image?id=1</a
+        >
+      </li>
+    </ul>
+  </div>
+</div>
+
+<hr class="my-4" />
+
+<h2 class="text-center mb-4">壁纸列表</h2>
+<div class="row">
+  <% if (wallpapers && wallpapers.length > 0) { %> <%
+  wallpapers.forEach(function(wallpaper) { %>
+  <div class="col-md-6 col-lg-4 mb-4">
+    <div class="card wallpaper-item">
+      <img
+        src="<%= wallpaper.url %>"
+        alt="<%= wallpaper.title || '壁纸' %>"
+        class="wallpaper-image"
+        onerror="this.src='/favicon.svg'"
+      />
+      <div class="card-body">
+        <div class="wallpaper-title"><%= wallpaper.title || '无标题' %></div>
+        <div class="wallpaper-url">
+          <a target="_blank" href="<%= wallpaper.url %>"
+            ><%= wallpaper.url %></a
+          >
+        </div>
+        <div class="wallpaper-meta">
+          添加时间: <%= new Date(wallpaper.created_at).toLocaleString() %>
+        </div>
+        <form
+          action="/wallpapers/delete/<%= wallpaper.id %>"
+          method="POST"
+          class="delete-btn"
+        >
+          <button
+            type="submit"
+            class="btn btn-sm btn-danger"
+            onclick="return confirm('确定要删除这张壁纸吗？')"
+          >
+            删除
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <% }); %> <% } else { %>
+  <div class="col-12">
+    <p class="text-center">暂无壁纸，请添加壁纸。</p>
+  </div>
+  <% } %>
+</div>
