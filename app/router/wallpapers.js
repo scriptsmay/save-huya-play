@@ -32,6 +32,13 @@ router.post('/add', async (req, res) => {
       'INSERT INTO wallpapers(url, title) VALUES($1, $2)',
       [url, title || '']
     );
+
+    const redisClient = require('../remoteRedis');
+    await redisClient.connect();
+    // 再添加到 Redis 集合中
+    await redisClient.sAdd('wallpapers', url);
+    await redisClient.disconnect();
+
     res.redirect('/wallpapers');
   } catch (err) {
     console.error('添加壁纸失败:', err);
