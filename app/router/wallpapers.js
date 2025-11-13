@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const wallpaperPool = require('../../config/wallpaperPg');
+const redisClient = require('../remoteRedis');
 
 // 获取壁纸列表页面
 router.get('/', async (req, res) => {
@@ -28,21 +29,38 @@ router.post('/add', async (req, res) => {
   }
 
   try {
+    // 先检查 Redis 连接
+    if (!redisClient.isConnected) {
+      console.log('Redis not connected, attempting to reconnect...');
+      await redisClient.connect();
+    }
+
+    // 使用事务确保数据一致性（如果支持）
+    // 或者按顺序执行：Redis 先，PostgreSQL 后
+    await redisClient.sAdd('wallpapers', url);
+
+    // 如果 Redis 成功，再插入 PostgreSQL
     await wallpaperPool.query(
       'INSERT INTO wallpapers(url, title) VALUES($1, $2)',
       [url, title || '']
     );
 
-    const redisClient = require('../remoteRedis');
-    await redisClient.connect();
-    // 再添加到 Redis 集合中
-    await redisClient.sAdd('wallpapers', url);
-    await redisClient.disconnect();
-
+    console.log(`壁纸添加成功: ${url}`);
     res.redirect('/wallpapers');
   } catch (err) {
     console.error('添加壁纸失败:', err);
-    res.status(500).send('添加壁纸失败');
+
+    // 根据错误类型返回不同的错误信息
+    if (
+      err.message.includes('ECONNREFUSED') ||
+      err.message.includes('WRONGPASS')
+    ) {
+      res.status(503).send('系统暂时不可用，请稍后重试');
+    } else if (err.message.includes('duplicate key')) {
+      res.status(400).send('该壁纸已存在');
+    } else {
+      res.status(500).send('添加壁纸失败');
+    }
   }
 });
 
