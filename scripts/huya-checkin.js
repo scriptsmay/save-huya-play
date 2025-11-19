@@ -5,7 +5,7 @@ const {
   sleep,
   getElementsByText,
   dumpAllMessage,
-  clickCenter,
+  // clickCenter,
 } = require('./util/index');
 const config = require('../config/config');
 const redisClient = require('../config/redis');
