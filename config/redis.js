@@ -13,34 +13,8 @@ class RedisClient {
   }
 
   _mergeConfig(customOptions = {}) {
-    // 判断是否使用连接字符串
-    const useConnectionString =
-      process.env.REDIS_CONNECTION_STRING ||
-      (process.env.REMOTE_REDIS_HOST && process.env.REMOTE_REDIS_PASSWORD);
-
-    if (useConnectionString) {
-      // 使用连接字符串方式
-      let connectionString;
-
-      if (process.env.REDIS_CONNECTION_STRING) {
-        connectionString = process.env.REDIS_CONNECTION_STRING;
-      } else {
-        // 构建连接字符串
-        const protocol =
-          process.env.REDIS_SSL === 'true' ? 'rediss://' : 'redis://';
-        const username = process.env.REDIS_USER || 'default';
-        const password =
-          process.env.REMOTE_REDIS_PASSWORD || process.env.REDIS_PASSWORD;
-        const host = process.env.REMOTE_REDIS_HOST || process.env.REDIS_HOST;
-        const port = process.env.REMOTE_REDIS_PORT || process.env.REDIS_PORT;
-
-        connectionString = `${protocol}${username}:${password}@${host}:${port}`;
-      }
-
-      return {
-        url: connectionString,
-        ...customOptions,
-      };
+    if (customOptions.url) {
+      return customOptions;
     } else {
       // 使用传统配置对象方式
       const defaultConfig = {
