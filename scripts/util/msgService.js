@@ -217,7 +217,7 @@ async function sendGotify({
   } catch (error) {
     console.error(
       'Gotify 发送通知失败:',
-      error.response?.data || error.message
+      error.response?.status || error.message
     );
     throw error;
   }

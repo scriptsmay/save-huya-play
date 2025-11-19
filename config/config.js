@@ -14,7 +14,8 @@ const URL_HUYA_TASK_KPL =
 const URL_HUYA_BADGELIST =
   'https://i.huya.com/index.php?m=HomeIndex#/fansBadgeList';
 
-const URL_HUYA_H5_CHECKIN = 'https://hd.huya.com/h5/task_center/index.html';
+const URL_HUYA_H5_CHECKIN =
+  'https://hd.huya.com/h5/welfare_center/index.html?hideBar=1';
 
 // 虎牙任务中心
 const URL_HUYA_TASK_CENTER =
@@ -89,17 +90,17 @@ const DOUYU_ROOMS = [
   },
 ];
 
-const qqMsgTpl = {
-  group_id: 1034923436,
-  message: [
-    {
-      type: 'text',
-      data: {
-        text: '{{title}}\n{{content}}\n',
-      },
-    },
-  ],
-};
+// const qqMsgTpl = {
+//   group_id: 1034923436,
+//   message: [
+//     {
+//       type: 'text',
+//       data: {
+//         text: '{{title}}\n{{content}}\n',
+//       },
+//     },
+//   ],
+// };
 
 const config = {
   ...envs,
@@ -149,16 +150,15 @@ const config = {
   DOUYU_SELECTORS,
 
   apiConfig: [
-    {
-      type: 'qq',
-      url: 'http://192.168.31.10:3000/send_group_msg',
-      method: 'post',
-      dataTpl: JSON.stringify(qqMsgTpl),
-    },
+    // {
+    //   type: 'qq',
+    //   url: 'http://192.168.31.10:3000/send_group_msg',
+    //   method: 'post',
+    //   dataTpl: JSON.stringify(qqMsgTpl),
+    // },
     // 可以添加更多类型的API地址
     // { type: 'wechat', url: 'http://example.com/wechat_api' }
   ],
-
   DOUYU_ROOMS,
 };
 
