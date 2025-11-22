@@ -119,15 +119,17 @@ class RedisClient {
 
     this.client.on('connect', () => {
       console.log(
-        'Redis connected to',
-        this._config.socket?.host + ':' + this._config.socket?.port
+        'Redis connected',
+        this._config.socket
+          ? ` to ${this._config.socket.host}:${this._config.socket.port}`
+          : ''
       );
       this._isConnected = true;
       this._processPendingOperations();
     });
 
     this.client.on('ready', () => {
-      console.log('Redis ready to use (DB:', this._config.database + ')');
+      console.log('Redis ready to use');
       this._isConnected = true;
     });
 
