@@ -127,7 +127,7 @@ async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
       // 设置页面视图
       await roomPage.setViewport({ width: 1280, height: 800 });
       // 1. 导航到房间页
-      timeLog(`开始处理房间 ${roomId}`);
+
       await roomPage
         .goto(URL_ROOM, {
           waitUntil: 'domcontentloaded',
@@ -142,7 +142,7 @@ async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
 
       // 获取页面标题并打印
       const title = await roomPage.title();
-      timeLog(`页面标题： ${title}`);
+      timeLog(`开始处理 ${roomId} ：${title}`);
 
       // 等待15s
       await sleep(15000);

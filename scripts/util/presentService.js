@@ -99,7 +99,7 @@ async function sendGiftAndRefresh(roomId, frame, giftIcon, text, count) {
  * @param {number | string} count 礼物数量
  */
 async function submitGift(roomId, page, count) {
-  timeLog(`房间 ${roomId}：开始赠送礼物`);
+  // timeLog(`房间 ${roomId}：开始赠送礼物`);
 
   // 确保弹出层弹出
   await page
