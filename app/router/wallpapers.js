@@ -3,14 +3,55 @@ const router = express.Router();
 const wallpaperPool = require('../../config/wallpaperPg');
 const redisClient = require('../remoteRedis');
 
+// format: "https://{domain}{data.urlbase}_{hd}.{ext}&{query}",
+// example: "https://cn.bing.com/th?id=OHR.CostadaMorte_EN-US3132736041_1920x1080.jpg&w=384&h=216",
+/**
+ * 壁纸分辨率列表
+ */
+const hdList = [
+  'UHD',
+  '1920x1200',
+  '1920x1080',
+  '1366x768',
+  '1280x768',
+  '1024x768',
+  '800x600',
+  '800x480',
+  '768x1280',
+  '720x1280',
+  '640x480',
+  '480x800',
+  '400x240',
+  '320x240',
+  '240x320',
+];
 // 获取壁纸列表页面
 router.get('/', async (req, res) => {
   try {
     const result = await wallpaperPool.query(
       'SELECT id, url, title, created_at FROM wallpapers ORDER BY created_at DESC'
     );
+    // 处理数据，为每个分辨率生成字段
+    // 如 url_UHD, url_1280_768, url_800_480
+    const wallpapers = result.rows.map((wallpaper) => {
+      if (!wallpaper.url || typeof wallpaper.url !== 'string') {
+        return wallpaper;
+      }
+
+      // 复制原始对象
+      const processed = { ...wallpaper };
+
+      // 为每个分辨率生成字段
+      hdList.forEach((resolution) => {
+        const fieldName = `url_${resolution.toLowerCase().replace('x', '_')}`;
+        processed[fieldName] = wallpaper.url.replace(/_UHD/g, `_${resolution}`);
+      });
+
+      return processed;
+    });
+
     res.render('wallpapers/index', {
-      wallpapers: result.rows,
+      wallpapers,
       title: '壁纸管理',
       styles: `<link href="/css/wallpapers.css" rel="stylesheet" />`,
     });
