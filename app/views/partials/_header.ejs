@@ -1,5 +1,5 @@
 <!-- Bootstrap 导航栏 -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+<nav class="navbar navbar-expand-lg navbar-light bg-light bg-gradient mb-3">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">数据查询系统</a>
     <button
@@ -17,19 +17,20 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a
-            class="nav-link <%= path === '/' ? 'active' : '' %>"
-            aria-current="page"
-            href="/"
-            >首页</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
             class="nav-link <%= path === '/wallpapers' ? 'active' : '' %>"
             href="/wallpapers"
             >壁纸管理</a
           >
         </li>
+        <li class="nav-item">
+          <a
+            class="nav-link <%= path === '/videos' ? 'active' : '' %>"
+            aria-current="page"
+            href="/videos"
+            >数据回放</a
+          >
+        </li>
+
         <li class="nav-item">
           <a
             class="nav-link <%= path === '/logs' ? 'active' : '' %>"

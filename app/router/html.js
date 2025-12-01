@@ -19,8 +19,13 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+// 当访问根路径时，重定向到 /wallpapers
+router.get('/', (req, res) => {
+  res.redirect('/wallpapers');
+});
+
 // 路由：获取分页数据
-router.get('/', async (req, res) => {
+router.get('/videos', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -62,7 +67,7 @@ router.get('/', async (req, res) => {
     // 获取当前页数据
     const dataResult = await pool.query(dataQuery, queryParams);
 
-    res.render('index', {
+    res.render('videos/index', {
       videos: dataResult.rows,
       currentPage: page,
       totalPages,
