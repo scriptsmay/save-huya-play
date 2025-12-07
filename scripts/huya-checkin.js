@@ -29,7 +29,7 @@ const msgService = require('./util/msgService');
     }
 
     // 虎牙赛事预测
-    config.HUYA_MATCH_PREDICT = 'false';
+    // config.HUYA_MATCH_PREDICT = 'false';
     await matchPredict(browser);
 
     timeLog('虎牙h5任务：开始执行... ', config.URLS.URL_HUYA_H5_CHECKIN);

@@ -22,8 +22,11 @@ const URL_HUYA_TASK_CENTER =
   'https://hd.huya.com/web/icenter-userlevel/index.html';
 
 // 虎牙赛事预言入口 375 x 667
+// const URL_HUYA_MATCH_YUYAN_ENTRY =
+//   'https://hd.huya.com/h5/match-guess-area/index.html#/square?fromweb=1&webTTProvidedData=%7B%22lp%22%3A1571877666%2C%22roomId%22%3A660002%2C%22nick%22%3A%22%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%B5%9B%E4%BA%8B%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuyaimg.msstatic.com%2Favatar%2F1010%2F66%2F6aba6b4323ab3c52960e7bf169d08e_180_135.jpg%3F1737770255%22%7D';
+
 const URL_HUYA_MATCH_YUYAN_ENTRY =
-  'https://hd.huya.com/h5/match-guess-area/index.html#/square?fromweb=1&webTTProvidedData=%7B%22lp%22%3A1571877666%2C%22roomId%22%3A660002%2C%22nick%22%3A%22%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E8%B5%9B%E4%BA%8B%22%2C%22avatar%22%3A%22https%3A%2F%2Fhuyaimg.msstatic.com%2Favatar%2F1010%2F66%2F6aba6b4323ab3c52960e7bf169d08e_180_135.jpg%3F1737770255%22%7D';
+  'https://hd.huya.com/h5/match_guess_icenter/index.html?fromguesspanel=1&hideBar=1&fromweb=1';
 
 const URL_HUYA_MATCH_YUYAN_POINT =
   'https://hd.huya.com/h5/match_guess_icenter/index.html?fromguesspanel=1&hideBar=1&fromweb=1';
