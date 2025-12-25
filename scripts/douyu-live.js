@@ -93,23 +93,13 @@ async function goMainTask(browser) {
     // 获取页面标题并打印
     const title = await page.title();
     timeLog(`页面标题： ${title}`);
-    await page.close();
-    await sleep(15000);
-
-    // 第一次打开可能会有弹窗，关掉页面重开一次
-    page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
 
-    await page.goto(URL_DOUYU_LIVE_PAGE, {
-      waitUntil: 'domcontentloaded',
-      // waitUntil: 'networkidle2',
-      timeout: 30000,
-    });
-    await sleep(10000);
+    await sleep(5000);
     await roomCheckIn(page, LIVE_ROOM_ID);
-    await sleep(10000);
+    await sleep(5000);
   } catch (error) {
-    console.error(`打开 URL 发生错误:`, error);
+    timeLog(`打开 URL 发生错误:`, error.message);
     if (process.env.NODE_ENV == 'production') {
       await goScreenShot(page);
     }
@@ -147,15 +137,17 @@ async function goScreenShot(page) {
  */
 async function roomCheckIn(page, roomId) {
   // const BADGE_SELECTOR = '.FansMedalPanel-enter';
-  const PACKAGE_BTN_SELECTOR = '.BackpackButton';
-  const GIFT_ITEM_SELECTOR = '.Backpack-prop.is-effect';
-  const giftCountSelector = `${GIFT_ITEM_SELECTOR} .Backpack-propCount`;
+  const PACKAGE_BTN_SELECTOR = '#js-backpack-enter';
+  const GIFT_ITEM_SELECTOR = '.ToolbarBackpack-giftItem.is-effect';
+  const giftCountSelector = `${GIFT_ITEM_SELECTOR} .ToolbarBackpack-giftItem--count`;
+
+  // 点击背包
+  await page.locator(PACKAGE_BTN_SELECTOR).click();
+  await sleep(5000);
 
   // 第一次进入直播间会有个弹框提示，先刷新页面
   await page.reload();
   await sleep(10000);
-
-  // 点击背包
   await page.locator(PACKAGE_BTN_SELECTOR).click();
   await sleep(5000);
 
