@@ -217,7 +217,9 @@ async function roomCheckIn(page, roomId) {
       );
       break;
     } else if (text.includes(SELECTORS.CHECK_BTN_TEXT)) {
-      // timeLog(`房间 ${roomId}：开始打卡...[${roomCount}/${totalRoomCount}]`);
+      console.log(
+        `房间 ${roomId}：开始打卡...[${roomCount}/${totalRoomCount}]`
+      );
       await btn.click();
       setRedisCheckIn = true;
 
