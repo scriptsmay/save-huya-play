@@ -4,23 +4,13 @@
 
 const puppeteer = require('puppeteer');
 const config = require('../config/config');
-const {
-  getTodayDateString,
-  getTimestamp,
-  timeLog,
-  getScreenShotPath,
-} = require('./util/index');
+const { getTimestamp, timeLog, getScreenShotPath } = require('./util/index');
 const msgService = require('./util/msgService');
 
 // const SEND_PIC = false;
 
-// 2025年总
-const leagueId = 20250003;
-const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${leagueId}`;
-const todayStr = getTodayDateString('-');
-// const URL_MATCH_DATA = `https://pvp.qq.com/matchdata/schedule.html?league_id=${leagueId}&match_calendar=${todayStr}`;
-
-console.log(todayStr);
+const URL_MATCH_DATA = 'https://kpl.qq.com/';
+const URL_MATCH_DATA_TODAY = 'https://kpl.qq.com/#/Schedule';
 
 (async () => {
   // 启动浏览器
@@ -31,8 +21,15 @@ console.log(todayStr);
     protocolTimeout: config.protocolTimeout,
   });
   try {
-    // await dayMatch(browser);
-    await mainTask(browser);
+    // today
+    await commonPic(
+      browser,
+      URL_MATCH_DATA_TODAY,
+      '.schedule-main .scroll-wrap'
+    );
+
+    // board
+    await commonPic(browser, URL_MATCH_DATA, '#floor2');
   } catch (error) {
     console.error('执行过程中出错:', error.message);
   } finally {
@@ -42,44 +39,27 @@ console.log(todayStr);
   }
 })();
 
-async function mainTask(browser) {
+async function commonPic(browser, url, selectorName) {
   // 打开新页面
   const page = await browser.newPage();
   // 设置视口大小
   await page.setViewport({ width: 1280, height: 800 });
 
   // 导航到目标URL
-  await page.goto(URL_MATCH_DATA, {
+  await page.goto(url, {
     waitUntil: 'networkidle2', // 等待网络空闲
     timeout: 30000, // 30秒超时
   });
-  await screenshot(page, 'fixed-position');
+
+  // 赛程
+  await screenshot(page, selectorName);
 }
 
-// async function dayMatch(browser) {
-//   const page = await browser.newPage();
-//   // 设置视口大小
-//   await page.setViewport({ width: 1280, height: 800 });
-//   await page.goto('https://pvp.qq.com/match/kpl/kingproleague/match.html', {
-//     waitUntil: 'networkidle2', // 等待网络空闲
-//     timeout: 30000, // 30秒超时
-//   });
-
-//   // // 积分榜
-//   // await screenshot(page, 'scoreboard');
-
-//   // // 赛程 .schedule
-//   // await screenshot(page, 'schedule');
-
-//   // // 季后赛
-//   // await screenshot(page, 'match-flow3');
-// }
-
 async function screenshot(page, selectorName) {
-  const imageFileName = `kpl_${selectorName}.${getTimestamp()}.png`;
+  const imageFileName = `kpl_everyday.${getTimestamp()}.png`;
   console.log('正在截图...', selectorName);
   const domElement = await page
-    .waitForSelector(`.${selectorName}`)
+    .waitForSelector(`${selectorName}`)
     .catch((err) => {
       console.log(`没有找到这个DOM元素...${selectorName}`, err.message);
       return null;

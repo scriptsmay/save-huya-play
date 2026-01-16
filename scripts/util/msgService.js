@@ -11,7 +11,7 @@ const {
   MESSAGE_GOTIFY_TOKEN,
 } = require('../../config/config');
 
-const { isInAllowedTime } = require('./index');
+// const { isInAllowedTime } = require('./index');
 
 const larkClient = require('../../config/lark');
 
@@ -98,8 +98,7 @@ async function sendMessage(title, content, description = '') {
  * @returns
  */
 async function sendPicture({ filePath = '', url = '' }) {
-  // console.log(url)
-  if (filePath && isInAllowedTime()) {
+  if (filePath) {
     const result = await larkClient.sendImage(filePath);
     if (result && result.code == 0) {
       console.log('Lark图片消息发送成功:', result.msg);
