@@ -4,7 +4,12 @@
 
 const puppeteer = require('puppeteer');
 const config = require('../config/config');
-const { getTimestamp, timeLog, getScreenShotPath } = require('./util/index');
+const {
+  getTimestamp,
+  timeLog,
+  getScreenShotPath,
+  sleep,
+} = require('./util/index');
 const msgService = require('./util/msgService');
 
 // const SEND_PIC = false;
@@ -59,7 +64,10 @@ async function screenshot(page, selectorName) {
   const imageFileName = `kpl_everyday.${getTimestamp()}.png`;
   console.log('正在截图...', selectorName);
   const domElement = await page
-    .waitForSelector(`${selectorName}`)
+    .waitForSelector(`${selectorName}`, {
+      visible: true,
+      timeout: 10000,
+    })
     .catch((err) => {
       console.log(`没有找到这个DOM元素...${selectorName}`, err.message);
       return null;
@@ -67,6 +75,21 @@ async function screenshot(page, selectorName) {
   if (!domElement) {
     return;
   }
+  // 滚动元素到可视区域
+  await page.evaluate((selector) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
+      });
+    }
+  }, selectorName);
+
+  // 等待滚动完成和可能的动画
+  await sleep(1000);
+
   const result = await domElement
     .screenshot({
       path: `logs/screenshot/${imageFileName}`,
@@ -79,6 +102,8 @@ async function screenshot(page, selectorName) {
   if (!result) {
     return;
   }
+
+  console.log(`截图成功: ${imageFileName}`);
 
   await msgService
     .sendPicture({
