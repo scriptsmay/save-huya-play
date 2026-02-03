@@ -1,7 +1,8 @@
 // 快手直播测试
 
-const TEST_ID_LIST = ['wangtao0115WE', 'KSGJuHao'];
-// const TEST_ROOM_ID = 'KSGJuHao';
+// 定义目标 URL
+const TARGET_ROOM_LIST = config.KUAISHOU_ROOM_LIST.split(',') || [];
+const totalRoomCount = TARGET_ROOM_LIST.length;
 const URL_PREFIX = `https://live.kuaishou.com/u/`;
 
 const puppeteer = require('puppeteer');
@@ -31,9 +32,11 @@ const redisClient = require('../config/redis');
   try {
     const page = await browser.newPage();
 
-    for (const id of TEST_ID_LIST) {
+    timeLog(`快手直播测试开始,共${totalRoomCount}个直播间`);
+
+    for (const id of TARGET_ROOM_LIST) {
       const url_test = URL_PREFIX + id;
-      timeLog(`【快手】开始执行任务： ${url_test}`);
+      timeLog(`URL： ${url_test}`);
 
       await page.goto(url_test, {
         waitUntil: 'domcontentloaded',
