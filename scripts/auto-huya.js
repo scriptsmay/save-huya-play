@@ -147,6 +147,16 @@ async function autoCheckInRoom(browser, roomId, hasGiftNum = 0) {
       // 等待15s
       await sleep(15000);
 
+      // KPL官方直播间
+      if (roomId == '660002') {
+        // 直接记录用户打卡
+        await checkInService.setCheckIn(roomId);
+        // 只赠送2个虎粮
+        await presentService.room(roomPage, roomId, 2);
+        checkResult = true;
+        return;
+      }
+
       if (!statusCheck.checked) {
         await roomCheckIn(roomPage, roomId);
       }
