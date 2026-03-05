@@ -10,9 +10,9 @@ logfile="logs/task_live.$(date +'%Y%m%d').log"
 
 start=$(date +%s)
 
-run_node scripts/huya-kpl.js
 run_node scripts/auto-huya.js
 run_node scripts/douyu-live.js
+run_node scripts/huya-kpl.js
 
 end=$(date +%s)
 log "执行完毕，耗时: $((end-start)) 秒"

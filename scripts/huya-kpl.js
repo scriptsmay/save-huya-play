@@ -28,11 +28,8 @@ const SELECTOR_BTN_GET = '.hy-mission-btn--get';
 
     timeLog('开始执行主线程任务...');
     // 实现了多窗口任务同时进行
-    await Promise.all([kplCheckIn(browser), startKplTask(browser)]).catch(
-      (err) => {
-        console.error('发生错误:', err);
-      }
-    );
+    await kplCheckIn(browser);
+    await startKplTask(browser);
   } catch (error) {
     console.error('发生错误:', error);
   } finally {
@@ -93,10 +90,10 @@ async function startKplTask(browser) {
 }
 
 /**
- * 打开KPL页面停留5分钟
+ * 打开KPL页面停留
  */
 async function kplCheckIn(browser) {
-  timeLog('【虎牙KPL】打开页面停留2分钟...');
+  // timeLog('【虎牙KPL】打开页面...');
   const page = await browser.newPage();
   try {
     await page.goto(config.URLS.URL_HUYA_LIVE_KPL, {
@@ -117,7 +114,7 @@ async function kplCheckIn(browser) {
 
       await sleep(5000);
     }
-    await sleep(1 * 60000);
+    await sleep(6000);
     return true;
   } catch (error) {
     console.error('打开虎牙KPL页面发生错误:', error);
