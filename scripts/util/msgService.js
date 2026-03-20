@@ -97,7 +97,7 @@ async function sendMessage(title, content, description = '') {
  * @param {*} url
  * @returns
  */
-async function sendPicture({ filePath = '', url = '' }) {
+async function sendPicture({ filePath = '' }) {
   if (filePath) {
     const result = await larkClient.sendImage(filePath);
     if (result && result.code == 0) {
@@ -106,7 +106,7 @@ async function sendPicture({ filePath = '', url = '' }) {
   }
 
   // QQ设置了免打扰
-  await sendQQMsg({ url });
+  // await sendQQMsg({ url });
 
   // await sendGotify({
   //   filePath,

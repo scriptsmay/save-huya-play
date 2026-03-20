@@ -15,7 +15,7 @@ const msgService = require('./util/msgService');
 // const SEND_PIC = false;
 
 const URL_MATCH_DATA = 'https://kpl.qq.com/';
-const URL_MATCH_DATA_TODAY = 'https://kpl.qq.com/#/Schedule';
+// const URL_MATCH_DATA_TODAY = 'https://kpl.qq.com/#/Schedule';
 
 (async () => {
   // 启动浏览器
@@ -27,11 +27,11 @@ const URL_MATCH_DATA_TODAY = 'https://kpl.qq.com/#/Schedule';
   });
   try {
     // today
-    await commonPic(
-      browser,
-      URL_MATCH_DATA_TODAY,
-      '.schedule-main .scroll-wrap'
-    );
+    // await commonPic(
+    //   browser,
+    //   URL_MATCH_DATA_TODAY,
+    //   '.schedule-main .scroll-wrap'
+    // );
 
     // board
     await commonPic(browser, URL_MATCH_DATA, '#floor2');
@@ -107,7 +107,7 @@ async function screenshot(page, selectorName) {
 
   await msgService
     .sendPicture({
-      url: `http://192.168.31.10:3210/screenshot/${imageFileName}`,
+      // url: `http://192.168.31.10:3210/screenshot/${imageFileName}`,
       filePath: getScreenShotPath(imageFileName),
     })
     .catch((err) => {
